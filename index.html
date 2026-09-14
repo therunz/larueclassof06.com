@@ -100,9 +100,14 @@
     overflow: hidden;
     text-align: center;
   }
+  header.hero .wrap {
+    position: relative;
+    z-index: 1;
+  }
   header.hero::after {
     content: "";
     position: absolute;
+    z-index: 0;
     right: -8%;
     bottom: -30%;
     width: 60%;
@@ -126,7 +131,7 @@
     line-height: 0.98;
     text-transform: uppercase;
   }
-  header.hero h1 .accent { color: #7d95e6; }
+  header.hero h1 .accent { color: #a9bdf7; }
   header.hero .sub {
     margin-top: 22px;
     font-size: 1.2rem;
@@ -389,8 +394,8 @@
     <div class="ticket-step">
       <label for="ticket-type" style="display:block; font-weight:600; color:var(--navy); margin-bottom:8px;">Ticket Type</label>
       <select id="ticket-type" style="padding:11px 12px; border:1px solid var(--line); border-radius:3px; font-family:'Source Sans 3',sans-serif; font-size:1rem; width:100%; max-width:320px;">
-        <option value="single">Single Ticket &mdash; $25</option>
-        <option value="couple">Couple Ticket &mdash; $40</option>
+        <option value="single">Single Ticket</option>
+        <option value="couple">Couple Ticket</option>
       </select>
     </div>
 
