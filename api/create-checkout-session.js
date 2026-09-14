@@ -34,6 +34,7 @@ export default async function handler(req, res) {
       ui_mode: 'embedded',
       mode: 'payment',
       line_items: [{ price: priceId, quantity: 1 }],
+      metadata: { ticketType },
       custom_fields: [
         {
           key: 'full_name',
