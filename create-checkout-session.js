@@ -10,7 +10,7 @@ const PRICE_IDS = {
 
 export default async function handler(req, res) {
   // Allow the browser on your GitHub Pages site to call this endpoint
-  res.setHeader('Access-Control-Allow-Origin', 'https://larueclassof06.com');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
