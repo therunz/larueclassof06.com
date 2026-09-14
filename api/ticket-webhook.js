@@ -66,6 +66,22 @@ export default async function handler(req, res) {
       } catch (err) {
         console.error('Failed to send ticket email:', err);
       }
+
+      try {
+        await fetch(process.env.GOOGLE_SHEET_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: process.env.GOOGLE_SHEET_SECRET,
+            name,
+            email,
+            ticketType: TICKET_LABELS[ticketType] || 'Reunion Ticket',
+          }),
+        });
+        console.log(`Logged ${email} to attendee sheet`);
+      } catch (err) {
+        console.error('Failed to log attendee to sheet:', err);
+      }
     } else {
       console.error('No email found on completed session:', session.id);
     }
