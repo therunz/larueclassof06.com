@@ -325,7 +325,7 @@
 <nav>
   <div class="wrap">
     <div class="brand">
-      <img src="Larue_Logo_06.png" alt="Larue County logo">
+      <img src="larue-logo.jpg" alt="Larue County logo">
       <span>Class of 2006</span>
     </div>
     <ul>
@@ -337,7 +337,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <img class="logo" src="Larue_Logo_06.png" alt="Larue County Hawks logo">
+    <img class="logo" src="larue-logo.jpg" alt="Larue County Hawks logo">
     <div class="eyebrow">Larue County High School</div>
     <h1>Twenty Years<br><span class="accent">Later</span></h1>
     <p class="sub">The Class of 2006 reunion &mdash; one weekend back home.</p>
@@ -384,37 +384,61 @@
       <h2>Get Your Tickets</h2>
       <div class="rule"></div>
     </div>
-    <p class="intro">Getting your ticket is two quick steps: send payment on Venmo, then confirm below so we know it's you.</p>
+    <p class="intro">Choose your ticket type and pay securely below.</p>
 
     <div class="ticket-step">
-      <h3><span class="num">1</span> Pay on Venmo</h3>
-      <!-- Replace @YourVenmoHandle with your actual Venmo username -->
-      <p>Send your ticket payment to <strong>@YourVenmoHandle</strong> and put your name in the note.</p>
+      <label for="ticket-type" style="display:block; font-weight:600; color:var(--navy); margin-bottom:8px;">Ticket Type</label>
+      <select id="ticket-type" style="padding:11px 12px; border:1px solid var(--line); border-radius:3px; font-family:'Source Sans 3',sans-serif; font-size:1rem; width:100%; max-width:320px;">
+        <option value="single">Single Ticket &mdash; $25</option>
+        <option value="couple">Couple Ticket &mdash; $40</option>
+      </select>
     </div>
 
-    <div class="ticket-step">
-      <h3><span class="num">2</span> Confirm your payment</h3>
-      <p>Fill this out right after you pay so we can match it up and email your ticket.</p>
-
-      <!--
-        Sign up free at formspree.io, create a form, and replace
-        YOUR_FORM_ID below with the ID from your form's endpoint URL
-        (https://formspree.io/f/YOUR_FORM_ID). Every submission will
-        land in your email automatically.
-      -->
-      <form class="confirm-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-        <label for="name">Name (as it shows on Venmo)</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="email">Email (where we'll send your ticket)</label>
-        <input type="email" id="email" name="email" required>
-
-        <input type="hidden" name="_subject" value="New reunion ticket payment to verify">
-        <button type="submit">Submit for Verification</button>
-      </form>
+    <div class="ticket-step" id="checkout-wrap">
+      <div id="checkout">Loading checkout&hellip;</div>
     </div>
   </div>
 </section>
+
+<!--
+  Two placeholders left to fill in once you have them:
+  1. pk_live_YOUR_PUBLISHABLE_KEY  -> your Stripe publishable key
+  2. https://your-backend.vercel.app/api/create-checkout-session -> your deployed backend URL
+-->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe('pk_live_51UFZosFIEBxYaQ0V2XptrZBAkUcttBxqPHBD5kCvNjy5B0ekzmrvIYCmuboxhJdoxzi6loSAcmm6jqHxxMPmHWm000eBfWXBbQ');
+  const backendUrl = 'https://larueclassof06-com-r49n.vercel.app/api/create-checkout-session';
+  let checkout;
+
+  async function mountCheckout(ticketType) {
+    const container = document.getElementById('checkout');
+    container.textContent = 'Loading checkout…';
+    if (checkout) checkout.destroy();
+
+    const res = await fetch(backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticketType })
+    });
+    const data = await res.json();
+
+    if (!data.clientSecret) {
+      container.textContent = 'Sorry, something went wrong loading checkout. Please refresh and try again.';
+      return;
+    }
+
+    checkout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+    container.innerHTML = '';
+    checkout.mount('#checkout');
+  }
+
+  document.getElementById('ticket-type').addEventListener('change', (e) => {
+    mountCheckout(e.target.value);
+  });
+
+  mountCheckout('single');
+</script>
 
 <footer>
   <div class="wrap">
