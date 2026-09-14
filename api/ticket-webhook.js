@@ -21,6 +21,11 @@ const TICKET_LABELS = {
   couple: 'Couple Ticket',
 };
 
+const TICKET_IMAGES = {
+  single: 'https://larueclassof06.com/Ticket.png',
+  couple: 'https://larueclassof06.com/Ticket_double.png',
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -52,7 +57,7 @@ export default async function handler(req, res) {
           subject: 'Your Larue County Class of 2006 Reunion Ticket',
           html: `
             <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-              <img src="https://larueclassof06.com/Ticket.png" alt="Larue County Class of 2006 Reunion" width="480" style="display:block; margin-bottom: 16px; max-width: 100%;">
+              <img src="${TICKET_IMAGES[ticketType] || TICKET_IMAGES.single}" alt="Larue County Class of 2006 Reunion" width="480" style="display:block; margin-bottom: 16px; max-width: 100%;">
               <h2 style="color:#101d3a;">You're all set, ${name}!</h2>
               <p><strong>Name:</strong> ${name}</p>
               <p><strong>Ticket type:</strong> ${TICKET_LABELS[ticketType] || 'Reunion Ticket'}</p>
