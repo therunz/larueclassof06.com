@@ -325,7 +325,7 @@
 <nav>
   <div class="wrap">
     <div class="brand">
-      <img src="Larue_Logo_06.png" alt="Larue County logo">
+      <img src="larue-logo.jpg" alt="Larue County logo">
       <span>Class of 2006</span>
     </div>
     <ul>
@@ -337,7 +337,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <img class="logo" src="Larue_Logo_06.png" alt="Larue County Hawks logo">
+    <img class="logo" src="larue-logo.jpg" alt="Larue County Hawks logo">
     <div class="eyebrow">Larue County High School</div>
     <h1>Twenty Years<br><span class="accent">Later</span></h1>
     <p class="sub">The Class of 2006 reunion &mdash; one weekend back home.</p>
@@ -416,12 +416,24 @@
     container.textContent = 'Loading checkout…';
     if (checkout) checkout.destroy();
 
-    const res = await fetch(backendUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ticketType })
-    });
-    const data = await res.json();
+    let data;
+    try {
+      const res = await fetch(backendUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketType })
+      });
+      data = await res.json();
+      if (!res.ok) {
+        console.error('Backend error:', data);
+        container.textContent = 'Sorry, something went wrong loading checkout (' + (data.error || res.status) + '). Please refresh and try again.';
+        return;
+      }
+    } catch (err) {
+      console.error('Network/fetch error reaching backend:', err);
+      container.textContent = 'Could not reach the checkout server. Please refresh and try again.';
+      return;
+    }
 
     if (!data.clientSecret) {
       container.textContent = 'Sorry, something went wrong loading checkout. Please refresh and try again.';
