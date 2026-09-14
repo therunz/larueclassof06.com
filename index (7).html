@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Larue County Class of 2006 Reunion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #101d3a;
+    --royal: #1d3fd1;
+    --white: #ffffff;
+    --ice: #eef1fb;
+    --ink: #1a1a1e;
+    --line: #d4dcf3;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--ink);
+    background: var(--white);
+    line-height: 1.55;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    margin: 0;
+  }
+
+  a { color: inherit; }
+  .details a, .schedule a {
+    color: var(--royal);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---- Nav ---- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--navy);
+    border-bottom: 3px solid var(--royal);
+  }
+  nav .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  nav .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  nav .brand img { height: 36px; width: auto; }
+  nav .brand span {
+    color: var(--white);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    color: #c7d2f4;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  nav a:hover { color: var(--white); }
+
+  /* ---- Hero ---- */
+  header.hero {
+    background: var(--navy);
+    color: var(--white);
+    padding: 72px 0 96px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  header.hero::after {
+    content: "";
+    position: absolute;
+    right: -8%;
+    bottom: -30%;
+    width: 60%;
+    padding-bottom: 60%;
+    background: var(--royal);
+    opacity: 0.18;
+    transform: rotate(24deg);
+  }
+  header.hero .logo {
+    width: 132px;
+    height: auto;
+    margin-bottom: 28px;
+  }
+  header.hero .eyebrow {
+    color: #9fb1e8;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+  }
+  header.hero h1 {
+    font-size: clamp(2.6rem, 7vw, 4.6rem);
+    line-height: 0.98;
+    text-transform: uppercase;
+  }
+  header.hero h1 .accent { color: #7d95e6; }
+  header.hero .sub {
+    margin-top: 22px;
+    font-size: 1.2rem;
+    color: #dbe2f7;
+  }
+  header.hero .cta {
+    display: inline-block;
+    margin-top: 34px;
+    background: var(--white);
+    color: var(--navy);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 15px 34px;
+    border-radius: 3px;
+    font-size: 1.05rem;
+  }
+  header.hero .cta:hover { background: #dbe2f7; }
+
+  /* ---- Sections ---- */
+  section { padding: 72px 0; }
+  section.ice { background: var(--ice); }
+
+  .section-head {
+    margin-bottom: 32px;
+  }
+  .section-head h2 {
+    font-size: 2.1rem;
+    color: var(--navy);
+    text-transform: uppercase;
+  }
+  .section-head .rule {
+    width: 56px;
+    height: 4px;
+    background: var(--royal);
+    margin-top: 10px;
+  }
+
+  .welcome p {
+    font-size: 1.08rem;
+    max-width: 640px;
+  }
+
+  /* ---- Details list ---- */
+  .details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+  }
+  .details div {
+    padding: 26px 20px;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+  .details div:last-child { border-right: none; }
+  .details h3 {
+    font-size: 0.85rem;
+    color: var(--royal);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+  }
+  .details p { margin: 0; font-size: 1.05rem; }
+
+  /* ---- Schedule ---- */
+  .schedule ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 3px solid var(--royal);
+  }
+  .schedule li {
+    padding: 4px 0 30px 28px;
+    position: relative;
+  }
+  .schedule li::before {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 6px;
+    width: 13px;
+    height: 13px;
+    background: var(--white);
+    border: 3px solid var(--royal);
+    border-radius: 50%;
+  }
+  .schedule .day {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 1.3rem;
+    text-transform: uppercase;
+  }
+  .schedule .time {
+    color: var(--royal);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .schedule p { margin: 4px 0 0; }
+
+  /* ---- Tickets ---- */
+  .tickets .intro {
+    max-width: 640px;
+    margin-bottom: 28px;
+  }
+  .ticket-step {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 26px 28px;
+    margin-bottom: 18px;
+  }
+  .ticket-step h3 {
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .ticket-step .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: var(--royal);
+    color: var(--white);
+    border-radius: 50%;
+    font-size: 0.9rem;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .ticket-step p { margin: 0; }
+
+  .confirm-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 420px;
+    margin-top: 16px;
+  }
+  .confirm-form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #5b6688;
+    margin-top: 10px;
+  }
+  .confirm-form input {
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1rem;
+  }
+  .confirm-form input:focus {
+    outline: none;
+    border-color: var(--royal);
+  }
+  .confirm-form button {
+    margin-top: 18px;
+    background: var(--royal);
+    color: var(--white);
+    border: none;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: 3px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .confirm-form button:hover { background: #1834ab; }
+
+  /* ---- Footer ---- */
+  footer {
+    background: var(--navy);
+    color: #9fb1e8;
+    padding: 40px 0;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  footer strong { color: var(--white); }
+
+  @media (max-width: 640px) {
+    nav ul { gap: 16px; }
+    .details { grid-template-columns: 1fr; }
+    .details div { border-right: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <img src="larue-logo.png" alt="Larue County logo">
+      <span>Class of 2006</span>
+    </div>
+    <ul>
+      <li><a href="#details">Details</a></li>
+      <li><a href="#tickets">Tickets</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="logo" src="larue-logo.jpg" alt="Larue County Hawks logo">
+    <div class="eyebrow">Larue County High School</div>
+    <h1>Twenty Years<br><span class="accent">Later</span></h1>
+    <p class="sub">The Class of 2006 reunion &mdash; one weekend back home.</p>
+    <a class="cta" href="#tickets">Get Your Tickets</a>
+  </div>
+</header>
+
+<section class="welcome" id="welcome">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Welcome Back, Hawks</h2>
+      <div class="rule"></div>
+    </div>
+    <p>It's been two decades since we walked the halls together. Time to swap the old stories, catch up on the new ones, and see how far everybody's come &mdash; all in one weekend, back in Hodgenville.</p>
+  </div>
+</section>
+
+<section class="ice" id="details">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>The Details</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="details">
+      <div>
+        <h3>Date</h3>
+        <p>Saturday, October 17, 2026<br><span style="font-size: 0.9rem; color: #5b6688;">6:00 PM &ndash; 11:00 PM</span></p>
+      </div>
+      <div>
+        <h3>Location</h3>
+        <p><a href="https://www.facebook.com/kaylasfillup" target="_blank" rel="noopener">Kayla's Fill-Up Station</a></p>
+      </div>
+      <div>
+        <h3>Dress</h3>
+        <p>Casual &mdash; wear your blue</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tickets ice" id="tickets">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Get Your Tickets</h2>
+      <div class="rule"></div>
+    </div>
+    <p class="intro">Getting your ticket is two quick steps: send payment on Venmo, then confirm below so we know it's you.</p>
+
+    <div class="ticket-step">
+      <h3><span class="num">1</span> Pay on Venmo</h3>
+      <!-- Replace @YourVenmoHandle with your actual Venmo username -->
+      <p>Send your ticket payment to <strong>@YourVenmoHandle</strong> and put your name in the note.</p>
+    </div>
+
+    <div class="ticket-step">
+      <h3><span class="num">2</span> Confirm your payment</h3>
+      <p>Fill this out right after you pay so we can match it up and email your ticket.</p>
+
+      <!--
+        Sign up free at formspree.io, create a form, and replace
+        YOUR_FORM_ID below with the ID from your form's endpoint URL
+        (https://formspree.io/f/YOUR_FORM_ID). Every submission will
+        land in your email automatically.
+      -->
+      <form class="confirm-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <label for="name">Name (as it shows on Venmo)</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Email (where we'll send your ticket)</label>
+        <input type="email" id="email" name="email" required>
+
+        <input type="hidden" name="_subject" value="New reunion ticket payment to verify">
+        <button type="submit">Submit for Verification</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <strong>Larue County Class of 2006</strong><br>
+    Questions? Reach out to your reunion committee.
+  </div>
+</footer>
+
+</body>
+</html>
