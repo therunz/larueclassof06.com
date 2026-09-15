@@ -48,6 +48,8 @@ export default async function handler(req, res) {
     const ticketType = session.metadata?.ticketType;
     const nameField = session.custom_fields?.find((f) => f.key === 'full_name');
     const name = nameField?.text?.value || 'there';
+    const secondNameField = session.custom_fields?.find((f) => f.key === 'second_name');
+    const secondName = secondNameField?.text?.value || '';
 
     if (email) {
       try {
@@ -60,6 +62,7 @@ export default async function handler(req, res) {
               <img src="${TICKET_IMAGES[ticketType] || TICKET_IMAGES.single}" alt="Larue County Class of 2006 Reunion" width="480" style="display:block; margin-bottom: 16px; max-width: 100%;">
               <h2 style="color:#101d3a;">You're all set, ${name}!</h2>
               <p><strong>Name:</strong> ${name}</p>
+              ${secondName ? `<p><strong>Second Guest:</strong> ${secondName}</p>` : ''}
               <p><strong>Ticket type:</strong> ${TICKET_LABELS[ticketType] || 'Reunion Ticket'}</p>
               <p><strong>Saturday, October 17, 2026</strong><br>6:00 PM &ndash; 11:00 PM</p>
               <p><strong>Kayla's Fill-Up Station</strong><br>928 Old Elizabethtown Rd.<br>Hodgenville, KY 42748</p>
@@ -79,6 +82,7 @@ export default async function handler(req, res) {
           body: JSON.stringify({
             secret: process.env.GOOGLE_SHEET_SECRET,
             name,
+            secondName,
             email,
             ticketType: TICKET_LABELS[ticketType] || 'Reunion Ticket',
           }),
