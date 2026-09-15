@@ -30,19 +30,30 @@ export default async function handler(req, res) {
   }
 
   try {
+    const customFields = [
+      {
+        key: 'full_name',
+        label: { type: 'custom', custom: 'Full Name' },
+        type: 'text',
+        optional: false,
+      },
+    ];
+
+    if (ticketType === 'couple') {
+      customFields.push({
+        key: 'second_name',
+        label: { type: 'custom', custom: "Second Guest's Name" },
+        type: 'text',
+        optional: false,
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       mode: 'payment',
       line_items: [{ price: priceId, quantity: 1 }],
       metadata: { ticketType },
-      custom_fields: [
-        {
-          key: 'full_name',
-          label: { type: 'custom', custom: 'Full Name' },
-          type: 'text',
-          optional: false,
-        },
-      ],
+      custom_fields: customFields,
       return_url: 'https://larueclassof06.com/return?session_id={CHECKOUT_SESSION_ID}',
     });
 
