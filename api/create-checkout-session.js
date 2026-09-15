@@ -5,7 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // Your two real Price IDs from Stripe
 const PRICE_IDS = {
   single: 'price_1UFfb7FIEBxYaQ0VRyml9tCp',
-  couple: 'price_1UFdsjFIEBxYaQ0VcubD1vJk', // TEMPORARY: 50-cent test price — revert to price_1UFfabFIEBxYaQ0VQgWPGd3Q after testing
+  couple: 'price_1UFfabFIEBxYaQ0VQgWPGd3Q',
 };
 
 export default async function handler(req, res) {
