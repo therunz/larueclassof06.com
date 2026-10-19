@@ -297,9 +297,10 @@
     { name: 'Rock and Rogers Service Center', art: 'service', lines: ['ROCK AND', 'ROGERS'],   top: 'banner', c: '#cfd4dc' },
     { name: 'HomeTown Pizza',               art: 'shop',    lines: ['HOMETOWN', 'PIZZA'],      top: 'banner', c: '#a5442f', awn: ['#1f8a4c', '#ffffff'] },
     { name: "Sportsman's Lake",             art: 'lake',    lines: ["SPORTSMAN'S", 'LAKE'],    top: 'tree',   c: '#5f7f8f' },
-    { name: "Hodgen's Mill",                art: 'mill',    lines: ["HODGEN'S", 'MILL'],       top: 'tree',   c: '#8b5e3c' },
     { name: "Kayla's Fill-Up Station",      art: 'service', lines: ["KAYLA'S", 'FILL-UP', 'STATION'], top: 'banner', c: '#e8d9b8', roof: ['#ffffff', '#1d3fd1'], plate: ['#1d3fd1', '#ffffff'] },
     { name: 'Pizza Hut',                    art: 'hut',     lines: ['PIZZA', 'HUT'],           top: 'banner', c: '#d9c8a2' },
+    { name: "Garrett's Furniture",         art: 'shop',    lines: ["GARRETT'S", 'FURNITURE'], top: 'banner', c: '#b08a5a', awn: ['#2f5d8a', '#ffffff'] },
+    { name: 'Smith Drug Company',           art: 'shop',    lines: ['SMITH DRUG', 'COMPANY'],  top: 'banner', c: '#e7e1d0', awn: ['#1f8a6a', '#ffffff'] },
     { name: 'Creekfront Park',              art: 'park',    lines: ['CREEKFRONT', 'PARK'],     top: 'tree',   c: '#5b9a5a' },
     { name: 'Larue County High School',     art: 'school',  lines: ['LARUE CO.', 'HIGH SCHOOL'],  top: 'banner', c: '#a8553a', trim: '#1d3fd1' },
     { name: 'Hodgenville Elementary',       art: 'school',  lines: ['HODGENVILLE', 'ELEMENTARY'], top: 'banner', c: '#c9a45a', trim: '#b3261e' },
@@ -1042,25 +1043,6 @@
         ctx.strokeStyle = '#cfe3ff'; ctx.lineWidth = 1.5; ctx.beginPath();
         for (let k = 0; k < 4; k++) { const wx = x + 4 + k * 18 + Math.sin(t * 2 + k) * 2; ctx.moveTo(wx, fl - 8); ctx.quadraticCurveTo(wx + 4, fl - 12, wx + 8, fl - 8); }
         ctx.stroke();
-      }
-      frameBody(b, y);
-    },
-    mill(b, t) {
-      const { x, y, w, lm } = b;
-      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
-      ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; ctx.beginPath();
-      for (let xx = x + 7; xx < x + w; xx += 7) { ctx.moveTo(xx + 0.5, y); ctx.lineTo(xx + 0.5, y + b.h); } ctx.stroke();
-      ctx.fillStyle = '#5a3a24'; ctx.fillRect(x, y, w, 22);
-      ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); for (let yy = y + 5; yy < y + 22; yy += 5) { ctx.moveTo(x, yy + 0.5); ctx.lineTo(x + w, yy + 0.5); } ctx.stroke();
-      plate(b, y + 30, '#0b1530', '#fff');
-      if (b.h >= 110) {   // water wheel
-        const cx = x + w / 2, cy = y + b.h - 28, r = 22;
-        ctx.fillStyle = '#4a3220'; ctx.strokeStyle = WH; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = '#d8b88a'; ctx.lineWidth = 3;
-        const a0 = t * 1.2;
-        for (let k = 0; k < 4; k++) { const a = a0 + k * Math.PI / 4; ctx.beginPath(); ctx.moveTo(cx - Math.cos(a) * r, cy - Math.sin(a) * r); ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); ctx.stroke(); }
-        ctx.fillStyle = '#d8b88a'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 6.283); ctx.fill();
       }
       frameBody(b, y);
     }
