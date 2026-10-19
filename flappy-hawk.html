@@ -195,7 +195,8 @@
     letter-spacing: 0.12em;
     flex: 1;
   }
-  .fame .pts { font-weight: 600; }
+  .fame .pen { color: var(--soft); font-size: 0.95rem; min-width: 3.2em; text-align: right; }
+  .fame .pts { font-weight: 600; min-width: 2.4em; text-align: right; }
   .fame .empty { color: var(--soft); padding: 12px 4px; }
 </style>
 </head>
@@ -509,27 +510,31 @@
 
   function activeBoard() { return boardMode === 'shared' ? board : localBoard; }
 
-  function qualifies(score) {
+  // Equal scores are ranked by pennies collected; still equal, the earlier entry stays ahead.
+  const pen = e => e.pennies || 0;
+  function ahead(e, score, pennies) { return e.score > score || (e.score === score && pen(e) >= pennies); }
+
+  function qualifies(score, pennies) {
     if (score < 1) return false;
     const list = activeBoard() || [];
-    return list.length < 10 || score > list[list.length - 1].score;
+    return list.length < 10 || !ahead(list[list.length - 1], score, pennies);
   }
 
-  function rankFor(score) {
+  function rankFor(score, pennies) {
     const list = activeBoard() || [];
     let r = 1;
-    for (const e of list) if (e.score >= score) r++;
+    for (const e of list) if (ahead(e, score, pennies)) r++;
     return r;
   }
 
-  async function postScore(initials, score) {
+  async function postScore(initials, score, pennies) {
     // Always keep a local copy.
-    localBoard.push({ initials, score });
-    localBoard.sort((a, b) => b.score - a.score);
+    localBoard.push({ initials, score, pennies });
+    localBoard.sort((a, b) => b.score - a.score || pen(b) - pen(a));
     localBoard = localBoard.slice(0, 10);
     store.set('fh_scores', localBoard);
     store.set('fh_initials', initials);
-    myLast = { initials, score };
+    myLast = { initials, score, pennies };
 
     if (LEADERBOARD_URL) {
       try {
@@ -538,7 +543,7 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ initials, score })
+          body: JSON.stringify({ initials, score, pennies })
         });
       } catch (e) { /* the local copy is already saved */ }
       await new Promise(r => setTimeout(r, 900));
@@ -555,6 +560,7 @@
     mode.textContent = boardMode === 'shared' ? 'Top 10 scores from everyone'
       : boardMode === 'loading' ? 'Loading scores…'
       : (LEADERBOARD_URL ? 'Shared board unavailable — showing this device only' : 'Top 10 scores on this device');
+    mode.textContent += ' · ties go to the most pennies';
     ol.innerHTML = '';
     if (!list || !list.length) {
       const li = document.createElement('li');
@@ -566,11 +572,13 @@
     let markedMe = false;
     list.forEach((e, i) => {
       const li = document.createElement('li');
-      if (!markedMe && myLast && e.initials === myLast.initials && e.score === myLast.score) { li.className = 'me'; markedMe = true; }
-      li.innerHTML = '<span class="rank"></span><span class="ini"></span><span class="pts"></span>';
+      if (!markedMe && myLast && e.initials === myLast.initials && e.score === myLast.score && pen(e) === myLast.pennies) { li.className = 'me'; markedMe = true; }
+      li.innerHTML = '<span class="rank"></span><span class="ini"></span><span class="pen"></span><span class="pts"></span>';
       li.children[0].textContent = (i + 1) + '.';
       li.children[1].textContent = e.initials;
-      li.children[2].textContent = e.score;
+      li.children[2].textContent = pen(e) + '¢';
+      li.children[2].title = pen(e) + (pen(e) === 1 ? ' penny' : ' pennies');
+      li.children[3].textContent = e.score;
       ol.appendChild(li);
     });
   }
@@ -1257,8 +1265,17 @@
       ctx.fillStyle = '#fff'; ctx.fillText(ribbon.text, CFG.W / 2, 131);
       ctx.globalAlpha = 1;
     }
-    // badges
+    // badges: pennies first, then Lincoln Days and the slider when active
     let bx = 12;
+    ctx.fillStyle = 'rgba(11,21,48,.7)';
+    ctx.font = '800 17px ' + DISPLAY;
+    const pw = ctx.measureText(String(sim.pennies)).width + 40;
+    ctx.fillRect(bx, 14, pw, 26);
+    ctx.fillStyle = '#c27a42'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(bx + 14, 27, 8, 0, 6.283); ctx.fill(); ctx.stroke();
+    lincoln(bx + 14, 26.6, 0.42, '#6b3818', '#e0a06a', true);
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.fillText(String(sim.pennies), bx + 28, 33);
+    bx += pw + 8;
     if (sim.festLeft > 0) {
       ctx.font = '800 15px ' + DISPLAY;
       const label = '×2  LINCOLN DAYS  ' + sim.festLeft;
@@ -1348,10 +1365,10 @@
   function updateOver() {
     if (overPanel.hidden) return;
     $('bestLine').textContent = 'Best: ' + best;
-    const can = !posted && qualifies(sim.points) && boardMode !== 'loading';
+    const can = !posted && qualifies(sim.points, sim.pennies) && boardMode !== 'loading';
     initialsForm.hidden = !can;
     if (can) {
-      $('rankLine').textContent = 'You’d be #' + rankFor(sim.points) + ' on the board';
+      $('rankLine').textContent = 'You’d be #' + rankFor(sim.points, sim.pennies) + ' on the board';
       if (!initialsInput.value) initialsInput.value = store.get('fh_initials', '');
     } else if (!posted) {
       $('rankLine').textContent = sim.points > 0 && boardMode === 'loading' ? 'Checking the board…' : '';
@@ -1376,9 +1393,9 @@
     if (BLOCKED.includes(ini)) { msg.textContent = 'Pick different initials.'; return; }
     $('postBtn').disabled = true;
     msg.textContent = 'Posting…';
-    const score = sim.points;
+    const score = sim.points, pennies = sim.pennies;
     posted = true;
-    await postScore(ini, score);
+    await postScore(ini, score, pennies);
     initialsForm.hidden = true;
     msg.textContent = '';
     $('rankLine').textContent = 'Posted! You’re on the Hall of Fame below.';
@@ -1417,6 +1434,7 @@
   window.FH.flap = flap;
   window.FH.state = () => state;
   window.FH.peek = () => sim;   // read-only hook used by automated tests
+  window.FH.board = { qualifies, rankFor, setBoard: l => { board = l; boardMode = 'shared'; } };   // test hooks
 
   function handleEvents() {
     for (const ev of sim.events) {
