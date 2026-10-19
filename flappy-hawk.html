@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Flappy Hawk &mdash; Larue County Class of 2006</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #101d3a;
+    --deep: #0b1530;
+    --royal: #1d3fd1;
+    --ice: #eef1fb;
+    --soft: #9fb1e8;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--navy);
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    overscroll-behavior: none;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 48px;
+  }
+
+  .bar {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+  }
+  .bar a {
+    color: var(--soft);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .bar a:hover { color: #fff; }
+  .bar .tag {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+
+  /* ---- Stage ---- */
+  .stage {
+    position: relative;
+    width: min(100vw, calc((100vh - 64px) * 9 / 16), 440px);
+    width: min(100vw, calc((100dvh - 64px) * 9 / 16), 440px);
+    aspect-ratio: 9 / 16;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: var(--deep);
+  }
+
+  .mute {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 38px;
+    height: 38px;
+    border: 2px solid rgba(255,255,255,0.55);
+    background: rgba(11,21,48,0.55);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  .panel {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: 10px;
+    background: rgba(11, 21, 48, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    gap: 10px;
+  }
+  .panel img.logo { width: 92px; height: auto; margin-bottom: 4px; }
+  .panel h1, .panel h2 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1;
+  }
+  .panel h1 { font-size: 3.2rem; }
+  .panel h2 { font-size: 2.4rem; }
+  .panel p { margin: 0; color: #dbe2f7; font-size: 1.05rem; }
+  .panel .small { font-size: 0.9rem; color: var(--soft); }
+  .big-score {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    font-size: 4.6rem;
+    line-height: 1;
+  }
+  .btn {
+    background: #fff;
+    color: var(--navy);
+    border: none;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 13px 30px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .btn:hover { background: #dbe2f7; }
+  .btn.alt { background: var(--royal); color: #fff; }
+  .btn.alt:hover { background: #1834ab; }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+
+  .initials-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .initials-row { display: flex; gap: 8px; }
+  .initials-form input {
+    width: 112px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    padding: 6px 4px 6px 12px;
+    border: 2px solid var(--soft);
+    border-radius: 3px;
+    background: var(--deep);
+    color: #fff;
+  }
+  .initials-form input:focus { outline: none; border-color: #fff; }
+  .initials-form .btn { padding: 10px 18px; }
+
+  /* ---- Hall of fame ---- */
+  .fame {
+    width: min(100vw - 32px, 440px);
+    margin-top: 28px;
+  }
+  .fame h3 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.7rem;
+    margin: 0;
+  }
+  .fame .rule { width: 56px; height: 4px; background: var(--royal); margin: 8px 0 6px; }
+  .fame .mode { color: var(--soft); font-size: 0.9rem; margin-bottom: 10px; }
+  .fame ol { list-style: none; margin: 0; padding: 0; }
+  .fame li {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 9px 4px;
+    border-bottom: 1px solid #22346a;
+    font-size: 1.1rem;
+  }
+  .fame li.me { background: rgba(29, 63, 209, 0.28); }
+  .fame .rank { width: 26px; color: var(--soft); font-weight: 600; }
+  .fame .ini {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 0.12em;
+    flex: 1;
+  }
+  .fame .pts { font-weight: 600; }
+  .fame .empty { color: var(--soft); padding: 12px 4px; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <a href="index.html">&larr; Class of 2006</a>
+  <span class="tag">Flappy Hawk</span>
+</div>
+
+<div class="stage" id="stage">
+  <canvas id="c"></canvas>
+  <button class="mute" id="mute" aria-label="Toggle sound">&#128266;</button>
+
+  <div class="panel" id="startPanel">
+    <img class="logo" id="logo" src="Larue_Logo_06.png" alt="Larue County logo" onerror="this.style.display='none'">
+    <h1>Flappy<br>Hawk</h1>
+    <p>Tap, click, or press space to flap.<br>Fly around Hodgenville and don&rsquo;t hit anything.</p>
+    <p class="small">Grab Lincoln pennies. A Laha&rsquo;s Slider saves you from one crash. Fly through the Lincoln Days arch for double points.</p>
+    <button class="btn alt" id="playBtn">Play</button>
+    <div class="small" id="startBest"></div>
+  </div>
+
+  <div class="panel" id="overPanel" hidden>
+    <h2>Game Over</h2>
+    <div class="big-score" id="finalScore">0</div>
+    <div class="small" id="hitLine"></div>
+    <div class="small" id="statLine"></div>
+    <div class="small" id="bestLine"></div>
+    <div class="small" id="rankLine"></div>
+
+    <form class="initials-form" id="initialsForm" hidden>
+      <label class="small" for="initials">You made the board &mdash; enter your initials</label>
+      <div class="initials-row">
+        <input id="initials" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="AAA">
+        <button class="btn alt" type="submit" id="postBtn">Post</button>
+      </div>
+      <div class="small" id="formMsg"></div>
+    </form>
+
+    <button class="btn" id="againBtn">Play Again</button>
+  </div>
+</div>
+
+<section class="fame">
+  <h3>Hall of Fame</h3>
+  <div class="rule"></div>
+  <div class="mode" id="boardMode"></div>
+  <ol id="boardList"></ol>
+</section>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ============================================================
+     SETTINGS YOU CAN TWEAK
+     ============================================================ */
+
+  // Paste your Google Apps Script web-app URL here (ends in /exec) to turn
+  // on the shared, site-wide leaderboard. Leave blank for this-device-only.
+  const LEADERBOARD_URL = '';
+
+
+  // Difficulty. Everything ramps with the number of gates passed.
+  const CFG = {
+    W: 360, H: 640, GROUND: 72,
+    BIRD_X: 96, R: 12,
+    GRAVITY: 1500, FLAP: -425, MAXFALL: 640,
+    PIPE_W: 64, CAP_X: 5,
+    START_SPEED: 150, SPEED_PER: 3.0, MAX_SPEED: 245,
+    GAP0: 172, GAP_MIN: 128, GAP_SHRINK: 1.3,
+    T0: 1.30, T_MIN: 1.0, T_SHRINK: 0.012,
+    DELTA0: 60, DELTA_PER: 4, DELTA_MAX: 175,
+    MARGIN: 56, LEAD: 70,
+    BOTTOM_MIN: 100,                   // every building is at least this tall, so its sign always fits
+
+    // Town extras
+    PENNY_P: 0.65,                     // chance of a Lincoln penny between two gates
+    SLIDER_FIRST: 5, SLIDER_P: 0.10,   // Laha's Slider = one free crash
+    INV: 0.8,                          // seconds of safety after a slider save
+    ARCH_FIRST: 7, ARCH_EVERY: 11, ARCH_VAR: 3, // Lincoln Days arch schedule
+    FEST_GATES: 6,                     // gates that count double after the arch
+    PHASE: 8                           // gates per time-of-day change
+  };
+
+  // Every gate is one of these, in a shuffled order. `art` picks how it is drawn.
+  const LANDMARKS = [
+    { name: "Laha's Red Castle",            art: 'castle',  lines: ["LAHA'S"],                top: 'banner', c: '#b5322a' },
+    { name: 'The Sweet Shoppe',             art: 'shop',    lines: ['SWEET', 'SHOPPE'],        top: 'banner', c: '#f4c6d8', awn: ['#ec6fa0', '#ffffff'] },
+    { name: 'Lincoln Square',               art: 'statue',  lines: ['LINCOLN', 'SQUARE'],      top: 'flag',   c: '#c9ced8' },
+    { name: 'Lincoln Museum',               art: 'shop',    lines: ['LINCOLN', 'MUSEUM'],      top: 'flag',   c: '#8f4a36', awn: null },
+    { name: 'Lincoln Birthplace',           art: 'temple',  lines: ['LINCOLN', 'BIRTHPLACE'],  top: 'flag',   c: '#aeb6c4' },
+    { name: 'Nancy Lincoln Inn',            art: 'cabin',   lines: ['NANCY', 'LINCOLN INN'],   top: 'tree',   c: '#7b4e2e' },
+    { name: 'Lincoln Boyhood Home',         art: 'cabin',   lines: ['LINCOLN', 'BOYHOOD HOME'],top: 'tree',   c: '#8a6238' },
+    { name: "Joel Ray's Lincoln Jamboree",  art: 'barn',    lines: ['LINCOLN', 'JAMBOREE'],    top: 'banner', c: '#8d2b27' },
+    { name: "Paula's Hot Biscuit",          art: 'shop',    lines: ["PAULA'S", 'HOT BISCUIT'], top: 'banner', c: '#e6c27a', awn: ['#d9532b', '#ffffff'] },
+    { name: 'Rock and Rogers Service Center', art: 'service', lines: ['ROCK AND', 'ROGERS'],   top: 'banner', c: '#cfd4dc' },
+    { name: 'HomeTown Pizza',               art: 'shop',    lines: ['HOMETOWN', 'PIZZA'],      top: 'banner', c: '#a5442f', awn: ['#1f8a4c', '#ffffff'] },
+    { name: "Sportsman's Lake",             art: 'lake',    lines: ["SPORTSMAN'S", 'LAKE'],    top: 'tree',   c: '#5f7f8f' },
+    { name: "Hodgen's Mill",                art: 'mill',    lines: ["HODGEN'S", 'MILL'],       top: 'tree',   c: '#8b5e3c' },
+    { name: "Kayla's Fill-Up Station",      art: 'service', lines: ["KAYLA'S", 'FILL-UP', 'STATION'], top: 'banner', c: '#e8d9b8', roof: ['#ffffff', '#1d3fd1'], plate: ['#1d3fd1', '#ffffff'] },
+    { name: 'Pizza Hut',                    art: 'hut',     lines: ['PIZZA', 'HUT'],           top: 'banner', c: '#d9c8a2' },
+    { name: 'Creekfront Park',              art: 'park',    lines: ['CREEKFRONT', 'PARK'],     top: 'tree',   c: '#5b9a5a' },
+    { name: 'Larue County High School',     art: 'school',  lines: ['LARUE CO.', 'HIGH SCHOOL'],  top: 'banner', c: '#a8553a', trim: '#1d3fd1' },
+    { name: 'Hodgenville Elementary',       art: 'school',  lines: ['HODGENVILLE', 'ELEMENTARY'], top: 'banner', c: '#c9a45a', trim: '#b3261e' },
+    { name: 'Larue County Middle School',   art: 'school',  lines: ['LARUE CO.', 'MIDDLE SCHOOL'],top: 'banner', c: '#7a5a4a', trim: '#2f7a4a' }
+  ];
+
+  const BLOCKED = ['ASS','SEX','FUK','FCK','SHT','DIK','DCK','TIT','CUM','FAG','NIG','KKK','NZI'];
+  const STEP = 1 / 60;
+
+  /* ============================================================
+     SIMULATION (no DOM; also used for automated difficulty tests)
+     Gate placement uses its own random stream, separate from the
+     decoration stream (landmarks, pennies, sliders, arch), so the
+     difficulty is exactly what was tested before the town was added.
+     ============================================================ */
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  class Sim {
+    constructor(seed) {
+      this.rng = mulberry32(seed >>> 0);
+      this.drng = mulberry32((seed ^ 0x9E3779B9) >>> 0);
+      this.bird = { y: CFG.H * 0.42, vy: 0 };
+      this.pipes = [];
+      this.items = [];
+      this.events = [];
+      this.spawned = 0;
+      this.score = 0;          // gates passed (drives difficulty)
+      this.points = 0;         // what the player sees and posts
+      this.pennies = 0;
+      this.festLeft = 0;
+      this.shield = false;
+      this.inv = 0;
+      this.nextArch = CFG.ARCH_FIRST;
+      this.bag = [];
+      this.lastLm = -1;
+      this.hit = null;
+      this.dead = false;
+      this.lastGapY = CFG.H * 0.45;
+      this.groundX = 0;
+      this.spawn(CFG.W + CFG.LEAD);
+    }
+    speed() { return Math.min(CFG.MAX_SPEED, CFG.START_SPEED + CFG.SPEED_PER * this.score); }
+    nextLandmark() {
+      if (!this.bag.length) {
+        const b = LANDMARKS.map((_, i) => i);
+        for (let i = b.length - 1; i > 0; i--) {
+          const j = Math.floor(this.drng() * (i + 1));
+          const t = b[i]; b[i] = b[j]; b[j] = t;
+        }
+        if (b[b.length - 1] === this.lastLm) { const t = b[0]; b[0] = b[b.length - 1]; b[b.length - 1] = t; }
+        this.bag = b;
+      }
+      this.lastLm = this.bag.pop();
+      return this.lastLm;
+    }
+    spawn(x) {
+      const n = this.spawned++;
+      const gap = Math.max(CFG.GAP_MIN, CFG.GAP0 - CFG.GAP_SHRINK * n);
+      const dMax = Math.min(CFG.DELTA_MAX, CFG.DELTA0 + CFG.DELTA_PER * n);
+      const lo = CFG.MARGIN + gap / 2;
+      const hi = CFG.H - CFG.GROUND - CFG.BOTTOM_MIN - gap / 2;
+      const mag = dMax * (0.3 + 0.7 * this.rng());
+      let dir = this.rng() < 0.5 ? -1 : 1;
+      let y = this.lastGapY + dir * mag;
+      if (y < lo || y > hi) { dir = -dir; y = this.lastGapY + dir * mag; }
+      y = Math.max(lo, Math.min(hi, y));
+      this.lastGapY = y;
+      const T = Math.max(CFG.T_MIN, CFG.T0 - CFG.T_SHRINK * n);
+      const prev = this.pipes[this.pipes.length - 1];
+      const p = { x, gapY: y, gap, passed: false, spacing: this.speed() * T, lm: this.nextLandmark(), seed: Math.floor(this.drng() * 1e6) };
+      this.pipes.push(p);
+      if (prev) this.spawnItem(prev, p, n);
+    }
+    spawnItem(prev, p, n) {
+      const x = (prev.x + CFG.PIPE_W + p.x) / 2;
+      const y = Math.max(CFG.MARGIN + 20, Math.min(CFG.H - CFG.GROUND - CFG.MARGIN - 20,
+        (prev.gapY + p.gapY) / 2 + (this.drng() - 0.5) * 24));
+      if (n >= this.nextArch) {
+        this.nextArch = n + CFG.ARCH_EVERY + Math.floor(this.drng() * (CFG.ARCH_VAR + 1));
+        this.items.push({ type: 'arch', x, y, r: 0 });
+      } else if (n >= CFG.SLIDER_FIRST && this.drng() < CFG.SLIDER_P) {
+        this.items.push({ type: 'slider', x, y, r: 12 });
+      } else if (this.drng() < CFG.PENNY_P) {
+        this.items.push({ type: 'penny', x, y, r: 10 });
+      }
+    }
+    step(flap) {
+      if (this.dead) return;
+      this.events.length = 0;
+      const b = this.bird;
+      if (flap) b.vy = CFG.FLAP;
+      b.vy = Math.min(CFG.MAXFALL, b.vy + CFG.GRAVITY * STEP);
+      b.y += b.vy * STEP;
+      if (b.y < CFG.R) { b.y = CFG.R; if (b.vy < 0) b.vy = 0; }
+      if (this.inv > 0) this.inv -= STEP;
+
+      const sp = this.speed();
+      for (const p of this.pipes) p.x -= sp * STEP;
+      for (const it of this.items) it.x -= sp * STEP;
+      this.groundX = (this.groundX + sp * STEP) % 28;
+
+      const last = this.pipes[this.pipes.length - 1];
+      if (last.x + last.spacing <= CFG.W + CFG.PIPE_W) this.spawn(last.x + last.spacing);
+      while (this.pipes.length && this.pipes[0].x + CFG.PIPE_W + CFG.CAP_X < -10) this.pipes.shift();
+      while (this.items.length && this.items[0].x < -40) this.items.shift();
+
+      for (const p of this.pipes) {
+        if (!p.passed && p.x + CFG.PIPE_W / 2 < CFG.BIRD_X) {
+          p.passed = true; this.score++;
+          const pts = this.festLeft > 0 ? 2 : 1;
+          if (this.festLeft > 0) { this.festLeft--; if (this.festLeft === 0) this.events.push({ t: 'festend' }); }
+          this.points += pts;
+          this.events.push({ t: 'gate', lm: p.lm, pts });
+        }
+      }
+
+      for (const it of this.items) {
+        if (it.taken) continue;
+        if (it.type === 'arch') {
+          if (it.x < CFG.BIRD_X) { it.taken = true; this.festLeft = CFG.FEST_GATES; this.events.push({ t: 'arch' }); }
+        } else {
+          const dx = it.x - CFG.BIRD_X, dy = it.y - b.y, rr = CFG.R + it.r;
+          if (dx * dx + dy * dy < rr * rr) {
+            it.taken = true;
+            if (it.type === 'penny') {
+              const pts = this.festLeft > 0 ? 2 : 1;
+              this.points += pts; this.pennies++;
+              this.events.push({ t: 'penny', pts });
+            } else {
+              this.shield = true; this.events.push({ t: 'slider' });
+            }
+          }
+        }
+      }
+
+      if (b.y + CFG.R >= CFG.H - CFG.GROUND) {
+        b.y = CFG.H - CFG.GROUND - CFG.R; this.dead = true; this.hit = { ground: true }; return;
+      }
+      if (this.inv > 0) return;
+      for (const p of this.pipes) {
+        const x0 = p.x - CFG.CAP_X, x1 = p.x + CFG.PIPE_W + CFG.CAP_X;
+        if (circleRect(CFG.BIRD_X, b.y, CFG.R, x0, -1000, x1, p.gapY - p.gap / 2) ||
+            circleRect(CFG.BIRD_X, b.y, CFG.R, x0, p.gapY + p.gap / 2, x1, CFG.H)) {
+          if (this.shield) {
+            this.shield = false; this.inv = CFG.INV;
+            this.events.push({ t: 'shield' });
+            return;
+          }
+          this.dead = true; this.hit = { lm: p.lm }; return;
+        }
+      }
+    }
+  }
+
+  function circleRect(cx, cy, r, x0, y0, x1, y1) {
+    const nx = Math.max(x0, Math.min(cx, x1));
+    const ny = Math.max(y0, Math.min(cy, y1));
+    const dx = cx - nx, dy = cy - ny;
+    return dx * dx + dy * dy < r * r;
+  }
+
+  window.FH = { Sim, CFG, STEP, LANDMARKS };
+
+  /* ============================================================
+     STORAGE + LEADERBOARD
+     ============================================================ */
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  let best = store.get('fh_best', 0);
+  let localBoard = store.get('fh_scores', []);
+  let board = null;           // shared board (array) or null if unavailable
+  let boardMode = LEADERBOARD_URL ? 'loading' : 'local';
+  let myLast = null;          // {initials, score} just posted, for highlighting
+
+  function cleanInitials(s) { return String(s || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
+
+  async function fetchBoard() {
+    if (!LEADERBOARD_URL) { board = null; boardMode = 'local'; renderBoard(); return; }
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 6000);   // don't hang forever if the sheet is slow
+    try {
+      const r = await fetch(LEADERBOARD_URL, { cache: 'no-store', signal: ctl.signal });
+      const j = await r.json();
+      if (!Array.isArray(j.scores)) throw new Error('bad');
+      board = j.scores.slice(0, 10);
+      boardMode = 'shared';
+    } catch (e) {
+      board = null;
+      boardMode = 'local';
+    } finally {
+      clearTimeout(timer);
+    }
+    renderBoard();
+    if (state === 'dead') updateOver();
+  }
+
+  function activeBoard() { return boardMode === 'shared' ? board : localBoard; }
+
+  function qualifies(score) {
+    if (score < 1) return false;
+    const list = activeBoard() || [];
+    return list.length < 10 || score > list[list.length - 1].score;
+  }
+
+  function rankFor(score) {
+    const list = activeBoard() || [];
+    let r = 1;
+    for (const e of list) if (e.score >= score) r++;
+    return r;
+  }
+
+  async function postScore(initials, score) {
+    // Always keep a local copy.
+    localBoard.push({ initials, score });
+    localBoard.sort((a, b) => b.score - a.score);
+    localBoard = localBoard.slice(0, 10);
+    store.set('fh_scores', localBoard);
+    store.set('fh_initials', initials);
+    myLast = { initials, score };
+
+    if (LEADERBOARD_URL) {
+      try {
+        // text/plain + no-cors avoids a preflight request, which Apps Script can't answer.
+        await fetch(LEADERBOARD_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ initials, score })
+        });
+      } catch (e) { /* the local copy is already saved */ }
+      await new Promise(r => setTimeout(r, 900));
+      await fetchBoard();
+    } else {
+      renderBoard();
+    }
+  }
+
+  function renderBoard() {
+    const list = activeBoard();
+    const ol = document.getElementById('boardList');
+    const mode = document.getElementById('boardMode');
+    mode.textContent = boardMode === 'shared' ? 'Top 10 scores from everyone'
+      : boardMode === 'loading' ? 'Loading scores…'
+      : (LEADERBOARD_URL ? 'Shared board unavailable — showing this device only' : 'Top 10 scores on this device');
+    ol.innerHTML = '';
+    if (!list || !list.length) {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'No scores yet — be the first.';
+      ol.appendChild(li);
+      return;
+    }
+    let markedMe = false;
+    list.forEach((e, i) => {
+      const li = document.createElement('li');
+      if (!markedMe && myLast && e.initials === myLast.initials && e.score === myLast.score) { li.className = 'me'; markedMe = true; }
+      li.innerHTML = '<span class="rank"></span><span class="ini"></span><span class="pts"></span>';
+      li.children[0].textContent = (i + 1) + '.';
+      li.children[1].textContent = e.initials;
+      li.children[2].textContent = e.score;
+      ol.appendChild(li);
+    });
+  }
+
+  /* ============================================================
+     AUDIO
+     ============================================================ */
+
+  let muted = store.get('fh_muted', false);
+  let actx = null;
+  function tone(f1, f2, dur, type, vol) {
+    if (muted) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'square';
+      o.frequency.setValueAtTime(f1, t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(f2, 1), t + dur);
+      g.gain.setValueAtTime(vol || 0.05, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(actx.destination);
+      o.start(t); o.stop(t + dur);
+    } catch (e) {}
+  }
+  const sfx = {
+    flap() { tone(420, 640, 0.07, 'square', 0.035); },
+    score() { tone(880, 1320, 0.11, 'triangle', 0.07); },
+    hit() { tone(180, 50, 0.28, 'sawtooth', 0.08); },
+    penny() { tone(1200, 1800, 0.09, 'triangle', 0.06); setTimeout(() => tone(1800, 2400, 0.1, 'triangle', 0.05), 70); },
+    slider() { tone(500, 900, 0.14, 'triangle', 0.07); setTimeout(() => tone(700, 1200, 0.16, 'triangle', 0.06), 110); },
+    shield() { tone(300, 120, 0.25, 'triangle', 0.08); },
+    arch() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, f * 1.01, 0.18, 'triangle', 0.06), i * 90)); }
+  };
+
+  /* ============================================================
+     RENDERING
+     ============================================================ */
+
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  let scale = 1;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const cssW = canvas.clientWidth || CFG.W;
+    scale = cssW / CFG.W;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssW * (CFG.H / CFG.W) * dpr);
+    ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+
+  const DISPLAY = '"Big Shoulders Display", Impact, "Arial Narrow", sans-serif';
+  const WH = '#fff';
+
+  /* ---------- colour helpers ---------- */
+  const H2 = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const lerpA = (a, b, f) => a.map((v, i) => v + (b[i] - v) * f);
+  const css = a => 'rgb(' + a.map(Math.round).join(',') + ')';
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  const smooth = f => f * f * (3 - 2 * f);
+
+  // Sky through a day: day, dusk, night, dawn.
+  const PAL = [
+    { top: '#4f9be8', bot: '#cfe8ff', sk: '#9bb8e4', gr: '#2e7d3c', dark: 0 },
+    { top: '#3b2f78', bot: '#ff9f6b', sk: '#4a3f7a', gr: '#34473f', dark: 0.5 },
+    { top: '#070e22', bot: '#27439a', sk: '#0d1a42', gr: '#0a1230', dark: 1 },
+    { top: '#5d79c9', bot: '#ffc9a8', sk: '#7d8fc4', gr: '#31694a', dark: 0.4 }
+  ].map(p => ({ top: H2(p.top), bot: H2(p.bot), sk: H2(p.sk), gr: H2(p.gr), dark: p.dark }));
+  const FEST = { top: H2('#ff8a2a'), bot: H2('#ffe08a'), sk: H2('#c9843c') };
+
+  function palAt(u) {
+    const i = Math.floor(u) % 4, f = smooth(u - Math.floor(u));
+    const a = PAL[i], b = PAL[(i + 1) % 4];
+    return { top: lerpA(a.top, b.top, f), bot: lerpA(a.bot, b.bot, f), sk: lerpA(a.sk, b.sk, f),
+             gr: lerpA(a.gr, b.gr, f), dark: a.dark + (b.dark - a.dark) * f };
+  }
+
+  /* ---------- fixed scenery ---------- */
+  const rnd = mulberry32(2006);
+  const stars = Array.from({ length: 46 }, () => ({ x: rnd() * CFG.W, y: rnd() * 330, r: 0.6 + rnd() * 1.3, p: rnd() * 6.28 }));
+  const skyline = [];
+  for (let x = 0; x < CFG.W * 2 + 80;) {
+    const w = 26 + rnd() * 38, h = 40 + rnd() * 90;
+    skyline.push({ x, w, h, lit: rnd() < 0.5 });
+    x += w + 2;
+  }
+  const SKY_W = skyline[skyline.length - 1].x + skyline[skyline.length - 1].w;
+  const clouds = Array.from({ length: 5 }, (_, i) => ({ x: i * 110 + rnd() * 40, y: 70 + rnd() * 190, s: 0.7 + rnd() * 0.8 }));
+  const balloons = Array.from({ length: 7 }, (_, i) => ({ x: i * 62 + rnd() * 30, y: 150 + rnd() * 240, s: 0.8 + rnd() * 0.6, p: rnd() * 6.28, c: ['#c8262c', '#ffffff', '#1d3fd1'][i % 3] }));
+
+  let scroll = 0;
+  let todU = 0, fb = 0;        // smoothed time-of-day and festival blend (0..1)
+
+  function drawBackground(t, pal) {
+    const { W, H, GROUND } = CFG;
+    const top = lerpA(pal.top, FEST.top, fb * 0.9), bot = lerpA(pal.bot, FEST.bot, fb * 0.9);
+    const g = ctx.createLinearGradient(0, 0, 0, H - GROUND);
+    g.addColorStop(0, css(top));
+    g.addColorStop(1, css(bot));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // stars
+    const sa = clamp01((pal.dark - 0.45) / 0.55) * (1 - fb);
+    if (sa > 0.01) {
+      for (const s of stars) {
+        ctx.globalAlpha = sa * (0.45 + 0.4 * Math.sin(t * 1.6 + s.p));
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    // sun
+    const sunA = (1 - pal.dark) * (1 - fb * 0.4);
+    if (sunA > 0.02) {
+      ctx.globalAlpha = sunA;
+      ctx.fillStyle = '#fff6c9';
+      ctx.beginPath(); ctx.arc(284, 118 + pal.dark * 70, 26, 0, 6.283); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    // clouds
+    ctx.fillStyle = css(lerpA([255, 255, 255], pal.sk, pal.dark)).replace('rgb', 'rgba').replace(')', ',' + (0.22 * (1 - fb)).toFixed(3) + ')');
+    for (const c of clouds) {
+      const x = ((c.x - scroll * 0.12) % (W + 160) + W + 160) % (W + 160) - 80;
+      ctx.beginPath();
+      ctx.ellipse(x, c.y, 46 * c.s, 14 * c.s, 0, 0, 6.283);
+      ctx.ellipse(x + 26 * c.s, c.y - 8 * c.s, 30 * c.s, 12 * c.s, 0, 0, 6.283);
+      ctx.fill();
+    }
+    // Lincoln Days balloons
+    if (fb > 0.02) {
+      ctx.globalAlpha = fb;
+      for (const b of balloons) {
+        const x = ((b.x - scroll * 0.22) % (W + 120) + W + 120) % (W + 120) - 40;
+        const y = b.y + Math.sin(t * 1.3 + b.p) * 8;
+        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y + 20 * b.s); ctx.lineTo(x + 3, y + 46 * b.s); ctx.stroke();
+        ctx.fillStyle = b.c; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(x, y, 15 * b.s, 19 * b.s, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+        lincoln(x, y - 1, 0.55 * b.s, b.c === '#ffffff' ? '#1d3fd1' : '#ffffff', b.c === '#ffffff' ? '#1d3fd1' : '#ffffff', true);
+      }
+      ctx.globalAlpha = 1;
+    }
+    // hills, then town skyline
+    const skC = lerpA(pal.sk, FEST.sk, fb * 0.8);
+    ctx.fillStyle = css(lerpA(skC, pal.gr, 0.55));
+    ctx.beginPath(); ctx.moveTo(0, H - GROUND);
+    for (let x = 0; x <= W; x += 12) {
+      ctx.lineTo(x, H - GROUND - 62 - 26 * Math.sin((x + scroll * 0.16) / 58) - 14 * Math.sin((x + scroll * 0.16) / 23));
+    }
+    ctx.lineTo(W, H - GROUND); ctx.closePath(); ctx.fill();
+
+    const off = (scroll * 0.3) % SKY_W;
+    const winA = clamp01((pal.dark - 0.4) / 0.4);
+    for (const b of skyline) {
+      for (const shift of [0, SKY_W]) {
+        const x = b.x - off + shift;
+        if (x > W || x + b.w < 0) continue;
+        ctx.fillStyle = css(skC);
+        ctx.fillRect(x, H - GROUND - b.h, b.w, b.h);
+        if (b.lit && winA > 0.02) {
+          ctx.fillStyle = 'rgba(255,230,150,' + (0.38 * winA).toFixed(3) + ')';
+          for (let wy = H - GROUND - b.h + 10; wy < H - GROUND - 10; wy += 18) {
+            ctx.fillRect(x + 6, wy, 4, 6);
+            if (b.w > 40) ctx.fillRect(x + b.w - 12, wy, 4, 6);
+          }
+        }
+      }
+    }
+  }
+
+  function drawBunting(t) {
+    // a sagging string of red, white and blue flags across the top
+    const { W } = CFG;
+    ctx.globalAlpha = fb;
+    const colors = ['#c8262c', '#ffffff', '#1d3fd1'];
+    const off = (scroll * 0.5) % 60;
+    for (let seg = -1; seg < 8; seg++) {
+      const x0 = seg * 60 - off, x1 = x0 + 60;
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x0, 4); ctx.quadraticCurveTo((x0 + x1) / 2, 30, x1, 4); ctx.stroke();
+      for (let k = 1; k < 5; k++) {
+        const f = k / 5, x = x0 + (x1 - x0) * f, y = 4 + 2 * (2 * 26 * f * (1 - f));
+        ctx.fillStyle = colors[(seg * 4 + k + 30) % 3];
+        ctx.beginPath(); ctx.moveTo(x - 6, y); ctx.lineTo(x + 6, y); ctx.lineTo(x, y + 13); ctx.closePath(); ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawGround(groundX, pal) {
+    const { W, H, GROUND } = CFG;
+    const y = H - GROUND;
+    ctx.fillStyle = css(pal.gr);
+    ctx.fillRect(0, y, W, GROUND);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, y, W, 4);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    for (let x = -groundX; x < W; x += 28) ctx.fillRect(x, y + 22, 14, 3);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    for (let x = -groundX + 14; x < W; x += 28) ctx.fillRect(x, y + 44, 14, 3);
+  }
+
+  /* ---------- Lincoln icon (hat, face, beard) ---------- */
+  function lincoln(cx, cy, s, hat, face, mono) {
+    ctx.fillStyle = hat || '#14161d';
+    ctx.fillRect(cx - 5 * s, cy - 12 * s, 10 * s, 9 * s);
+    ctx.fillRect(cx - 8 * s, cy - 3.5 * s, 16 * s, 2.6 * s);
+    ctx.fillStyle = mono ? (face || hat) : '#e8c9a0';
+    ctx.beginPath(); ctx.ellipse(cx, cy + 3 * s, 5.6 * s, 6.4 * s, 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = mono ? (hat || '#14161d') : '#1c1a18';
+    ctx.beginPath(); ctx.ellipse(cx, cy + 7 * s, 5.6 * s, 6 * s, 0, 0.15, Math.PI - 0.15); ctx.fill();
+    if (mono) { ctx.fillStyle = face || hat; ctx.beginPath(); ctx.ellipse(cx, cy + 2 * s, 3.2 * s, 3.6 * s, 0, 0, 6.283); ctx.fill(); }
+  }
+
+  function medallion(cx, cy, r) {
+    ctx.fillStyle = '#f2c14e'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.fill(); ctx.stroke();
+    lincoln(cx, cy - 1, r / 13);
+  }
+
+  /* ---------- landmark art ---------- */
+  function fitText(txt, maxW, base) {
+    let s = base;
+    ctx.font = '800 ' + s + 'px ' + DISPLAY;
+    while (ctx.measureText(txt).width > maxW && s > 6) { s -= 0.5; ctx.font = '800 ' + s + 'px ' + DISPLAY; }
+  }
+  function plate(b, y0, bg, fg) {
+    const lines = b.lm.lines, ph = lines.length * 11 + 7;
+    if (y0 + ph + 6 > b.y + b.h) return y0;
+    ctx.fillStyle = bg; ctx.fillRect(b.x + 5, y0, b.w - 10, ph);
+    ctx.strokeStyle = WH; ctx.lineWidth = 1.5; ctx.strokeRect(b.x + 5.5, y0 + 0.5, b.w - 11, ph - 1);
+    ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    lines.forEach((l, i) => { fitText(l, b.w - 20, 11); ctx.fillText(l, b.x + b.w / 2, y0 + 4.5 + i * 11 + 5.5); });
+    ctx.textBaseline = 'alphabetic';
+    return y0 + ph;
+  }
+  function brick(b, y0, fill, mortar) {
+    ctx.fillStyle = fill; ctx.fillRect(b.x, y0, b.w, b.y + b.h - y0);
+    ctx.strokeStyle = mortar; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let yy = y0 + 8; yy < b.y + b.h; yy += 8) { ctx.moveTo(b.x, yy + 0.5); ctx.lineTo(b.x + b.w, yy + 0.5); }
+    ctx.stroke();
+  }
+  function windows(b, y0, avoidBottom) {
+    const y1 = b.y + b.h - avoidBottom;
+    for (let yy = y0; yy + 18 <= y1; yy += 36) {
+      for (const wx of [b.x + 13, b.x + b.w - 26]) {
+        ctx.fillStyle = b.lit ? '#ffe39a' : '#8fb4dc';
+        ctx.fillRect(wx, yy, 13, 18);
+        ctx.strokeStyle = WH; ctx.lineWidth = 1.5; ctx.strokeRect(wx + 0.5, yy + 0.5, 12, 17);
+        ctx.beginPath(); ctx.moveTo(wx + 6.5, yy); ctx.lineTo(wx + 6.5, yy + 18); ctx.stroke();
+      }
+    }
+  }
+  function door(b, w, col, yMin) {
+    if (b.h < 72 || b.y + b.h - 28 < (yMin || 0) + 4) return;
+    const cx = b.x + b.w / 2, fl = b.y + b.h;
+    ctx.fillStyle = col || '#2a1c14'; ctx.fillRect(cx - w / 2, fl - 28, w, 28);
+    ctx.strokeStyle = WH; ctx.lineWidth = 1.5; ctx.strokeRect(cx - w / 2 + 0.5, fl - 27.5, w - 1, 27);
+  }
+  function frameBody(b, y0) {
+    ctx.strokeStyle = WH; ctx.lineWidth = 2.5;
+    ctx.strokeRect(b.x + 1.25, y0 + 1.25, b.w - 2.5, b.y + b.h - y0);
+  }
+
+  const ART = {
+    castle(b) {
+      const { x, y, w, lm } = b;
+      brick(b, y + 12, lm.c, 'rgba(0,0,0,.28)');
+      ctx.fillStyle = lm.c; ctx.strokeStyle = WH; ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) { ctx.fillRect(x + 3 + i * 18, y, 14, 16); ctx.strokeRect(x + 4 + i * 18, y + 1, 12, 15); }
+      ctx.fillStyle = '#8a2420'; ctx.fillRect(x, y + 14, w, 8);
+      ctx.strokeRect(x + 1.25, y + 15, w - 2.5, 7);
+      const yy = plate(b, y + 28, '#0b1530', '#fff');
+      ctx.fillStyle = '#2a1410';
+      for (let sy = yy + 12; sy + 16 <= b.y + b.h - 34; sy += 38) { ctx.fillRect(x + 16, sy, 5, 16); ctx.fillRect(x + w - 21, sy, 5, 16); }
+      if (b.h >= 72 && b.y + b.h - 30 >= yy + 4) {   // arched gate
+        const cx = x + w / 2, fl = y + b.h;
+        ctx.fillStyle = '#2a1410'; ctx.beginPath(); ctx.moveTo(cx - 10, fl); ctx.lineTo(cx - 10, fl - 20); ctx.arc(cx, fl - 20, 10, Math.PI, 0); ctx.lineTo(cx + 10, fl); ctx.fill();
+      }
+      frameBody(b, y + 12);
+    },
+    shop(b) {
+      const { x, y, w, lm } = b;
+      if (lm.awn) {
+        brick(b, y, lm.c, 'rgba(0,0,0,.16)');
+        const aw = w / 6;
+        for (let i = 0; i < 6; i++) {
+          ctx.fillStyle = lm.awn[i % 2]; ctx.fillRect(x + i * aw, y, aw, 15);
+          ctx.beginPath(); ctx.arc(x + i * aw + aw / 2, y + 15, aw / 2, 0, Math.PI); ctx.fill();
+        }
+        ctx.strokeStyle = WH; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x, y + 15.5); ctx.lineTo(x + w, y + 15.5); ctx.stroke();
+        var yy = plate(b, y + 30, '#0b1530', '#fff');
+      } else {
+        brick(b, y, lm.c, 'rgba(0,0,0,.25)');
+        ctx.fillStyle = '#ddd6c4'; ctx.fillRect(x, y, w, 10); ctx.fillRect(x + 3, y + 10, w - 6, 5);
+        ctx.fillStyle = '#c4bca7'; for (let i = 0; i < 9; i++) ctx.fillRect(x + 5 + i * 7.6, y + 10, 3, 5);
+        var yy = plate(b, y + 24, '#0b1530', '#fff');
+      }
+      windows(b, yy + 10, 34);
+      door(b, 18, null, yy);
+      frameBody(b, y);
+    },
+    school(b) {
+      const { x, y, w, lm } = b;
+      brick(b, y + 32, lm.c, 'rgba(0,0,0,.22)');
+      ctx.fillStyle = lm.trim; ctx.fillRect(x, y, w, 32);
+      ctx.fillStyle = 'rgba(255,255,255,.88)';
+      ctx.beginPath(); ctx.moveTo(x + 8, y + 29); ctx.lineTo(x + w / 2, y + 4); ctx.lineTo(x + w - 8, y + 29); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = lm.trim; ctx.fillRect(x, y + 30, w, 5);
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = lm.trim; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(x + w / 2, y + 21, 6, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + w / 2, y + 21); ctx.lineTo(x + w / 2, y + 17); ctx.moveTo(x + w / 2, y + 21); ctx.lineTo(x + w / 2 + 3, y + 22); ctx.stroke();
+      const yy = plate(b, y + 40, lm.trim, '#fff');
+      windows(b, yy + 10, 34);
+      if (b.y + b.h - 28 >= yy + 4 && b.h >= 72) { door(b, 24, '#1b2745', yy); ctx.fillStyle = WH; ctx.fillRect(b.x + b.w / 2 - 0.5, b.y + b.h - 27, 1.5, 26); }
+      ctx.strokeStyle = WH; ctx.lineWidth = 2.5; ctx.strokeRect(x + 1.25, y + 1.25, w - 2.5, b.h - 2.5);
+    },
+    cabin(b) {
+      const { x, y, w, lm } = b;
+      // roof with chimney
+      ctx.fillStyle = '#4d3321'; ctx.fillRect(x, y, w, 22);
+      ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); for (let yy = y + 6; yy < y + 22; yy += 5) { ctx.moveTo(x, yy + 0.5); ctx.lineTo(x + w, yy + 0.5); } ctx.stroke();
+      ctx.fillStyle = '#9aa0a8'; ctx.fillRect(x + w - 24, y, 14, 22);
+      ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.strokeRect(x + w - 24 + 0.5, y + 0.5, 13, 21);
+      // logs
+      let i = 0;
+      for (let yy = y + 22; yy < y + b.h; yy += 9, i++) {
+        const hh = Math.min(9, y + b.h - yy);
+        ctx.fillStyle = i % 2 ? lm.c : '#6a4326'; ctx.fillRect(x, yy, w, hh);
+        ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(x, yy, w, 2);
+        ctx.fillStyle = '#b98a58'; ctx.beginPath(); ctx.ellipse(x + 3, yy + 4.5, 3, 4, 0, 0, 6.283); ctx.ellipse(x + w - 3, yy + 4.5, 3, 4, 0, 0, 6.283); ctx.fill();
+      }
+      const yy2 = plate(b, y + 30, '#2b1b10', '#f0d9b5');
+      if (b.h >= 72 && y + b.h - 28 >= yy2 + 4) { ctx.fillStyle = '#2b1b10'; ctx.fillRect(x + w / 2 - 9, y + b.h - 28, 18, 28); ctx.strokeStyle = WH; ctx.lineWidth = 1.5; ctx.strokeRect(x + w / 2 - 8.5, y + b.h - 27.5, 17, 27); }
+      void yy2;
+      frameBody(b, y);
+    },
+    barn(b) {
+      const { x, y, w, lm } = b;
+      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
+      ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; ctx.beginPath();
+      for (let xx = x + 6; xx < x + w; xx += 6) { ctx.moveTo(xx + 0.5, y); ctx.lineTo(xx + 0.5, y + b.h); } ctx.stroke();
+      ctx.fillStyle = '#4e1815'; ctx.fillRect(x, y, w, 24);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x + 4, y + 20); ctx.lineTo(x + w / 2, y + 5); ctx.lineTo(x + w - 4, y + 20); ctx.stroke();
+      const yy = plate(b, y + 32, '#f3ead6', '#7a1f1c');
+      if (b.h >= 104) {
+        const fl = y + b.h, dw = w - 22;
+        ctx.fillStyle = '#f3ead6'; ctx.fillRect(x + 11, fl - 34, dw, 34);
+        ctx.strokeStyle = '#8d2b27'; ctx.lineWidth = 2;
+        ctx.strokeRect(x + 12, fl - 33, dw - 2, 32);
+        ctx.beginPath(); ctx.moveTo(x + 12, fl - 33); ctx.lineTo(x + w - 12, fl - 1); ctx.moveTo(x + w - 12, fl - 33); ctx.lineTo(x + 12, fl - 1); ctx.stroke();
+      }
+      void yy;
+      frameBody(b, y);
+    },
+    service(b) {
+      const { x, y, w, lm } = b;
+      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
+      const rf = lm.roof || ['#ffffff', '#c8262c'], pl = lm.plate || ['#c8262c', '#ffffff'];
+      ctx.fillStyle = rf[0]; ctx.fillRect(x, y, w, 16);
+      ctx.fillStyle = rf[1]; ctx.fillRect(x, y + 5, w, 6);
+      ctx.fillStyle = '#9aa2af'; ctx.fillRect(x, y + 16, w, 4);
+      const yy = plate(b, y + 28, pl[0], pl[1]);
+      if (b.h >= 108) {
+        const fl = y + b.h;
+        ctx.fillStyle = '#e9edf3'; ctx.fillRect(x + 9, fl - 42, w - 18, 42);
+        ctx.strokeStyle = '#8a93a3'; ctx.lineWidth = 1;
+        ctx.beginPath(); for (let k = fl - 38; k < fl; k += 6) { ctx.moveTo(x + 9, k + 0.5); ctx.lineTo(x + w - 9, k + 0.5); } ctx.stroke();
+        ctx.strokeStyle = WH; ctx.lineWidth = 1.5; ctx.strokeRect(x + 9.5, fl - 41.5, w - 19, 41);
+      }
+      void yy;
+      frameBody(b, y);
+    },
+    hut(b) {
+      const { x, y, w, lm } = b;
+      brick(b, y + 34, lm.c, 'rgba(0,0,0,.16)');
+      ctx.fillStyle = '#c8262c'; ctx.fillRect(x, y, w, 34);
+      ctx.fillStyle = '#9c1c20';
+      ctx.beginPath(); ctx.moveTo(x + 6, y + 31); ctx.lineTo(x + 14, y + 8); ctx.lineTo(x + w - 14, y + 8); ctx.lineTo(x + w - 6, y + 31); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.fillRect(x, y + 31, w, 3);
+      const yy = plate(b, y + 41, '#0b1530', '#fff');
+      // wide dark window band
+      if (b.y + b.h - 34 >= yy + 22) {
+        ctx.fillStyle = b.lit ? '#ffe39a' : '#35455f'; ctx.fillRect(x + 8, yy + 8, w - 16, 14);
+        ctx.strokeStyle = WH; ctx.lineWidth = 1.5; ctx.strokeRect(x + 8.5, yy + 8.5, w - 17, 13);
+      }
+      windows(b, yy + 32, 34);
+      door(b, 18, null, yy);
+      frameBody(b, y);
+    },
+    park(b, t) {
+      const { x, y, w, lm } = b;
+      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
+      // gazebo roof
+      ctx.fillStyle = '#2f6b4a'; ctx.fillRect(x, y, w, 20);
+      ctx.fillStyle = '#e8efe9'; ctx.fillRect(x, y + 18, w, 4);
+      ctx.fillStyle = '#245a3c';
+      for (let i = 0; i < 6; i++) ctx.fillRect(x + 4 + i * 12, y + 3, 4, 14);
+      // railing posts
+      ctx.fillStyle = '#e8efe9';
+      for (let i = 0; i < 7; i++) ctx.fillRect(x + 4 + i * 11, y + 22, 3, b.h - 22);
+      const yy = plate(b, y + 30, '#eef6ee', '#1d4a2e');
+      // creek at the bottom
+      const fl = y + b.h;
+      ctx.fillStyle = '#3f86c8'; ctx.fillRect(x, fl - 14, w, 14);
+      ctx.strokeStyle = '#d6ebff'; ctx.lineWidth = 1.5; ctx.beginPath();
+      for (let k = 0; k < 4; k++) { const wx = x + 4 + k * 18 + Math.sin(t * 2 + k) * 2; ctx.moveTo(wx, fl - 7); ctx.quadraticCurveTo(wx + 4, fl - 11, wx + 8, fl - 7); }
+      ctx.stroke();
+      void yy;
+      frameBody(b, y);
+    },
+    temple(b) {
+      const { x, y, w, lm } = b;
+      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
+      ctx.fillStyle = '#8c95a6'; ctx.fillRect(x, y, w, 8);
+      ctx.fillStyle = '#e6e9f0';
+      ctx.beginPath(); ctx.moveTo(x + 6, y + 30); ctx.lineTo(x + w / 2, y + 10); ctx.lineTo(x + w - 6, y + 30); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#8c95a6'; ctx.fillRect(x, y + 30, w, 5);
+      // columns
+      ctx.fillStyle = '#4b5563'; ctx.fillRect(x, y + 35, w, b.h - 35);
+      ctx.fillStyle = '#eef0f5';
+      for (let i = 0; i < 4; i++) ctx.fillRect(x + 6 + i * 16.5, y + 35, 9, b.h - 35 - (b.h > 60 ? 10 : 0));
+      plate(b, y + 44, '#eef0f5', '#1b2745');
+      if (b.h > 60) { ctx.fillStyle = '#b9bfcc'; ctx.fillRect(x, y + b.h - 10, w, 10); ctx.fillStyle = '#9aa1b0'; ctx.fillRect(x + 4, y + b.h - 5, w - 8, 5); }
+      frameBody(b, y);
+    },
+    statue(b) {
+      const { x, y, w, lm } = b;
+      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
+      ctx.fillStyle = '#9aa1b0'; ctx.fillRect(x, y, w, 9);
+      // niche with the bronze Lincoln
+      const nx = x + 14, nw = w - 28, ny = y + 13, nh = 40;
+      if (nh > 30) {
+        ctx.fillStyle = '#1b2745'; ctx.beginPath(); ctx.moveTo(nx, ny + nh); ctx.lineTo(nx, ny + 14); ctx.arc(nx + nw / 2, ny + 14, nw / 2, Math.PI, 0); ctx.lineTo(nx + nw, ny + nh); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = WH; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = '#8a6a3a'; ctx.fillRect(nx + nw / 2 - 7, ny + 24, 14, nh - 24);
+        lincoln(nx + nw / 2, ny + 17, 1.15);
+      }
+      plate(b, ny + nh + 6, '#0b1530', '#fff');
+      frameBody(b, y);
+    },
+    lake(b, t) {
+      const { x, y, w, lm } = b;
+      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
+      ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 1; ctx.beginPath();
+      for (let yy = y + 36; yy < y + b.h; yy += 11) { ctx.moveTo(x, yy + 0.5); ctx.lineTo(x + w, yy + 0.5); } ctx.stroke();
+      ctx.fillStyle = '#1f4f33'; ctx.fillRect(x, y, w, 26);
+      ctx.fillStyle = '#2f7048';
+      for (let i = 0; i < 5; i++) { const px = x + 8 + i * 14.5; ctx.beginPath(); ctx.moveTo(px - 8, y + 26); ctx.lineTo(px, y + 3); ctx.lineTo(px + 8, y + 26); ctx.fill(); }
+      plate(b, y + 34, '#0b1530', '#fff');
+      if (b.h >= 88) {
+        const fl = y + b.h;
+        ctx.fillStyle = '#2f6fb5'; ctx.fillRect(x, fl - 16, w, 16);
+        ctx.strokeStyle = '#cfe3ff'; ctx.lineWidth = 1.5; ctx.beginPath();
+        for (let k = 0; k < 4; k++) { const wx = x + 4 + k * 18 + Math.sin(t * 2 + k) * 2; ctx.moveTo(wx, fl - 8); ctx.quadraticCurveTo(wx + 4, fl - 12, wx + 8, fl - 8); }
+        ctx.stroke();
+      }
+      frameBody(b, y);
+    },
+    mill(b, t) {
+      const { x, y, w, lm } = b;
+      ctx.fillStyle = lm.c; ctx.fillRect(x, y, w, b.h);
+      ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; ctx.beginPath();
+      for (let xx = x + 7; xx < x + w; xx += 7) { ctx.moveTo(xx + 0.5, y); ctx.lineTo(xx + 0.5, y + b.h); } ctx.stroke();
+      ctx.fillStyle = '#5a3a24'; ctx.fillRect(x, y, w, 22);
+      ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); for (let yy = y + 5; yy < y + 22; yy += 5) { ctx.moveTo(x, yy + 0.5); ctx.lineTo(x + w, yy + 0.5); } ctx.stroke();
+      plate(b, y + 30, '#0b1530', '#fff');
+      if (b.h >= 110) {   // water wheel
+        const cx = x + w / 2, cy = y + b.h - 28, r = 22;
+        ctx.fillStyle = '#4a3220'; ctx.strokeStyle = WH; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#d8b88a'; ctx.lineWidth = 3;
+        const a0 = t * 1.2;
+        for (let k = 0; k < 4; k++) { const a = a0 + k * Math.PI / 4; ctx.beginPath(); ctx.moveTo(cx - Math.cos(a) * r, cy - Math.sin(a) * r); ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); ctx.stroke(); }
+        ctx.fillStyle = '#d8b88a'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 6.283); ctx.fill();
+      }
+      frameBody(b, y);
+    }
+  };
+
+  function drawBuilding(lm, x, w, y, h, lit, t) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x - 3, y - 3, w + 6, h + 6); ctx.clip();
+    const b = { x, y, w, h, lm, lit };
+    ART[lm.art](b, t);
+    if (fb > 0.02) {   // festival bunting along the roofline
+      ctx.globalAlpha = fb;
+      const cols = ['#c8262c', '#ffffff', '#1d3fd1'];
+      for (let i = 0; i < 5; i++) { ctx.fillStyle = cols[i % 3]; ctx.beginPath(); ctx.moveTo(x + 4 + i * 14, y + 1); ctx.lineTo(x + 16 + i * 14, y + 1); ctx.lineTo(x + 10 + i * 14, y + 10); ctx.closePath(); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+  }
+
+  function drawTopPiece(style, x, w, bottom, p, t) {
+    const cx = x + w / 2;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x - 4, -10, w + 8, bottom + 10); ctx.clip();
+    if (style === 'banner') {
+      ctx.fillStyle = '#1d3fd1'; ctx.fillRect(x, -8, w, bottom + 8);
+      ctx.fillStyle = '#fff'; ctx.fillRect(x + 6, -8, 3, bottom + 8); ctx.fillRect(x + w - 9, -8, 3, bottom + 8);
+      for (let yy = bottom - 40; yy > -20; yy -= 76) {
+        if (fb > 0.5 && yy === bottom - 40) { medallion(cx, yy, 14); continue; }
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx, yy, 14, 0, 6.283); ctx.fill();
+        ctx.fillStyle = '#1d3fd1'; ctx.font = '800 15px ' + DISPLAY; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LC', cx, yy + 1); ctx.textBaseline = 'alphabetic';
+      }
+      ctx.fillStyle = '#f2d36b'; ctx.fillRect(x, bottom - 9, w, 9);
+      ctx.fillStyle = '#b8932a'; for (let k = 0; k < 10; k++) ctx.fillRect(x + 3 + k * 7.3, bottom - 9, 1.5, 9);
+    } else if (style === 'flag') {
+      for (let yy = bottom, i = 0; yy > -12; yy -= 12, i++) { ctx.fillStyle = i % 2 ? '#ffffff' : '#c8262c'; ctx.fillRect(x, yy - 12, w, 12); }
+      ctx.fillStyle = '#1b3a8c'; ctx.fillRect(x, -10, w, 76);
+      ctx.fillStyle = '#fff';
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) { ctx.beginPath(); ctx.arc(x + 9 + c * 14 + (r % 2) * 6, 8 + r * 16, 2.1, 0, 6.283); ctx.fill(); }
+      if (fb > 0.5) medallion(cx, bottom - 40, 14);
+      ctx.fillStyle = '#f2d36b'; ctx.fillRect(x, bottom - 8, w, 8);
+      ctx.fillStyle = '#b8932a'; for (let k = 0; k < 10; k++) ctx.fillRect(x + 3 + k * 7.3, bottom - 8, 1.5, 8);
+    } else {   // tree canopy
+      const sd = p.seed;
+      ctx.fillStyle = '#2f6b3a'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.rect(x + 3, -12, w - 6, bottom - 6);
+      for (let k = 0; k < 4; k++) { ctx.moveTo(x + 9 + k * 19 + 9, bottom - 9); ctx.arc(x + 9 + k * 19, bottom - 9, 9.5, 0, 6.283); }
+      ctx.stroke(); ctx.fill();
+      ctx.fillStyle = '#3f8a4a';
+      for (let k = 0; k < 14; k++) {
+        const dx = (sd * (k + 3) * 7) % (w - 14), dy = (sd * (k + 5) * 13) % 140;
+        ctx.beginPath(); ctx.arc(x + 7 + dx, bottom - 18 - dy, 6 + (k % 3) * 2, 0, 6.283); ctx.fill();
+      }
+      ctx.fillStyle = '#245a31';
+      for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.arc(x + 9 + k * 19, bottom - 9, 7, 0, Math.PI); ctx.fill(); }
+      if (fb > 0.5) medallion(cx, bottom - 40, 14);
+    }
+    ctx.restore();
+  }
+
+  function drawGate(p, t, dark) {
+    const { H, GROUND, PIPE_W, CAP_X } = CFG;
+    const lm = LANDMARKS[p.lm];
+    const top = p.gapY - p.gap / 2, bot = p.gapY + p.gap / 2, floor = H - GROUND;
+    const x = p.x - CAP_X, w = PIPE_W + CAP_X * 2;
+    if (top > 0) drawTopPiece(lm.top, x, w, top, p, t);
+    if (bot < floor) drawBuilding(lm, x, w, bot, floor - bot, dark > 0.45, t);
+  }
+
+  /* ---------- pickups and the Lincoln Days arch ---------- */
+  // Laha's slider: a small burger, drawn at (cx, cy)
+  function slider(cx, cy, k) {
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k);
+    ctx.lineJoin = 'round'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.2;
+    ctx.fillStyle = '#d99a4e';                       // top bun
+    ctx.beginPath(); ctx.moveTo(-12, -2); ctx.quadraticCurveTo(-12, -13, 0, -13); ctx.quadraticCurveTo(12, -13, 12, -2); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff3c4'; ctx.fillRect(-6, -9, 2, 2); ctx.fillRect(1, -10, 2, 2); ctx.fillRect(5, -7, 2, 2);
+    ctx.fillStyle = '#7a3f1d'; ctx.fillRect(-13, -2, 26, 5); ctx.strokeRect(-13, -2, 26, 5);   // patty
+    ctx.fillStyle = '#f2c14e'; ctx.fillRect(-11, 3, 22, 2);                                    // cheese
+    ctx.fillStyle = '#d99a4e';                       // bottom bun
+    ctx.beginPath(); ctx.moveTo(-12, 5); ctx.lineTo(12, 5); ctx.lineTo(12, 8); ctx.quadraticCurveTo(12, 11, 8, 11); ctx.lineTo(-8, 11); ctx.quadraticCurveTo(-12, 11, -12, 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawItem(it, t) {
+    if (it.taken) return;
+    if (it.type === 'penny') {
+      const y = it.y + Math.sin(t * 4 + it.x * 0.05) * 3;
+      ctx.fillStyle = '#c27a42'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(it.x, y, 9.5, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#8a4e22'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(it.x, y, 7, 0, 6.283); ctx.stroke();
+      lincoln(it.x, y - 0.5, 0.52, '#6b3818', '#e0a06a', true);
+    } else if (it.type === 'slider') {
+      const y = it.y + Math.sin(t * 3 + it.x * 0.05) * 3;
+      slider(it.x, y, 1);
+    } else if (it.type === 'arch') {
+      const { H, GROUND } = CFG, x = it.x;
+      const g = ctx.createLinearGradient(x - 22, 0, x + 22, 0);
+      g.addColorStop(0, 'rgba(255,214,102,0)'); g.addColorStop(0.5, 'rgba(255,214,102,.38)'); g.addColorStop(1, 'rgba(255,214,102,0)');
+      ctx.fillStyle = g; ctx.fillRect(x - 22, 0, 44, H - GROUND);
+      ctx.fillStyle = '#fff'; ctx.fillRect(x - 24, 0, 4, H - GROUND); ctx.fillRect(x + 20, 0, 4, H - GROUND);
+      ctx.fillStyle = '#c8262c'; for (let yy = 8; yy < H - GROUND; yy += 22) { ctx.fillRect(x - 24, yy, 4, 11); ctx.fillRect(x + 20, yy, 4, 11); }
+      ctx.fillStyle = '#b3261e'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5;
+      ctx.fillRect(x - 54, 118, 108, 34); ctx.strokeRect(x - 53, 119, 106, 32);
+      ctx.fillStyle = '#fff'; ctx.font = '800 17px ' + DISPLAY; ctx.textAlign = 'center'; ctx.fillText('LINCOLN DAYS', x, 140);
+      lincoln(x - 42, 135, 0.7, '#fff', '#fff', true); lincoln(x + 42, 135, 0.7, '#fff', '#fff', true);
+      ctx.fillStyle = '#ffe9a8';
+      for (let k = 0; k < 8; k++) { const a = t * 2 + k, sy = 170 + ((k * 61) % 330), sx = x + Math.sin(a) * 16; ctx.globalAlpha = 0.4 + 0.5 * Math.sin(a * 1.7) ** 2; ctx.fillRect(sx, sy, 3, 3); }
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawHawk(x, y, angle, t, dead, hat, shield, flicker) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    if (flicker && Math.floor(t * 14) % 2) ctx.globalAlpha = 0.45;
+    const flap = dead ? -0.3 : Math.sin(t * 22);
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#fff';
+
+    ctx.fillStyle = '#1d3fd1';
+    ctx.beginPath();
+    ctx.moveTo(-14, -3); ctx.lineTo(-33, -9); ctx.lineTo(-30, -1); ctx.lineTo(-34, 6); ctx.lineTo(-14, 6);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    ctx.beginPath(); ctx.ellipse(0, 1, 20, 14, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#7d95e6';
+    ctx.beginPath(); ctx.ellipse(3, 7, 12, 6, 0, 0, 6.283); ctx.fill();
+
+    ctx.fillStyle = '#1d3fd1';
+    ctx.beginPath(); ctx.arc(14, -7, 10.5, 0, 6.283); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#f2d36b';
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(22, -12); ctx.quadraticCurveTo(34, -10, 31, 0); ctx.quadraticCurveTo(28, -4, 22, -3);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(16, -9, 3.6, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#0b1530';
+    ctx.beginPath(); ctx.arc(17, -9, dead ? 0.1 : 1.8, 0, 6.283); ctx.fill();
+    if (dead) {
+      ctx.strokeStyle = '#0b1530'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(14, -12); ctx.lineTo(19, -7); ctx.moveTo(19, -12); ctx.lineTo(14, -7); ctx.stroke();
+    }
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(11, -15); ctx.lineTo(21, -11); ctx.stroke();
+
+    if (hat) {   // Lincoln Days stovepipe hat
+      ctx.save(); ctx.translate(11, -16); ctx.rotate(-0.12);
+      ctx.fillStyle = '#14161d'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.8;
+      ctx.fillRect(-7, -17, 14, 17); ctx.strokeRect(-7, -17, 14, 17);
+      ctx.fillRect(-11, -2, 22, 4); ctx.strokeRect(-11, -2, 22, 4);
+      ctx.fillStyle = '#c8262c'; ctx.fillRect(-7, -6, 14, 3);
+      ctx.restore();
+    }
+
+    ctx.fillStyle = '#2a4fe6'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+    ctx.save();
+    ctx.translate(-3, 0);
+    ctx.rotate(flap * 0.55 - 0.15);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-8, -20, -26, -16 + flap * 6);
+    ctx.quadraticCurveTo(-16, -6, -22, 4);
+    ctx.quadraticCurveTo(-8, 4, 0, 6);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+
+    ctx.restore();
+    if (shield) {
+      ctx.save(); ctx.translate(x, y);
+      const pulse = 1 + Math.sin(t * 6) * 0.05;
+      ctx.fillStyle = 'rgba(255,225,140,.18)'; ctx.strokeStyle = 'rgba(255,225,140,.9)'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(2, 0, 30 * pulse, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* ---------- HUD ---------- */
+  let ribbon = { text: '', t: 0 };
+  const pops = [];
+  function pop(text, big) { pops.push({ text, big: !!big, age: 0 }); }
+
+  function drawHud(n, dt) {
+    ctx.textAlign = 'center';
+    ctx.font = '800 64px ' + DISPLAY;
+    ctx.lineWidth = 6; ctx.strokeStyle = '#0b1530'; ctx.lineJoin = 'round';
+    ctx.strokeText(n, CFG.W / 2, 96);
+    ctx.fillStyle = '#fff'; ctx.fillText(n, CFG.W / 2, 96);
+
+    if (ribbon.t > 0) {
+      ribbon.t -= dt;
+      const a = clamp01(Math.min(ribbon.t / 0.4, (1.8 - ribbon.t) / 0.15));
+      ctx.globalAlpha = a;
+      ctx.font = '700 22px ' + DISPLAY;
+      const tw = ctx.measureText(ribbon.text).width + 28;
+      ctx.fillStyle = 'rgba(11,21,48,.78)'; ctx.fillRect(CFG.W / 2 - tw / 2, 108, tw, 30);
+      ctx.fillStyle = '#fff'; ctx.fillText(ribbon.text, CFG.W / 2, 131);
+      ctx.globalAlpha = 1;
+    }
+    // badges
+    let bx = 12;
+    if (sim.festLeft > 0) {
+      ctx.font = '800 15px ' + DISPLAY;
+      const label = '×2  LINCOLN DAYS  ' + sim.festLeft;
+      const w = ctx.measureText(label).width + 20;
+      ctx.fillStyle = '#f2c14e'; ctx.fillRect(bx, 14, w, 26);
+      ctx.fillStyle = '#0b1530'; ctx.textAlign = 'left'; ctx.fillText(label, bx + 10, 33);
+      bx += w + 8;
+    }
+    if (sim.shield) {
+      ctx.fillStyle = 'rgba(11,21,48,.7)'; ctx.fillRect(bx, 14, 34, 26);
+      slider(bx + 17, 27, 0.8);
+    }
+    // popups
+    for (let i = pops.length - 1; i >= 0; i--) {
+      const pp = pops[i]; pp.age += dt;
+      if (pp.age > 1.5) { pops.splice(i, 1); continue; }
+      const a = clamp01(1.5 - pp.age);
+      ctx.globalAlpha = Math.min(1, a * 1.6);
+      ctx.textAlign = 'center';
+      ctx.font = (pp.big ? '800 26px ' : '800 20px ') + DISPLAY;
+      const x = pp.big ? CFG.W / 2 : CFG.BIRD_X + 34, y = pp.big ? 190 - pp.age * 12 : sim.bird.y - 30 - pp.age * 36;
+      ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0b1530'; ctx.strokeText(pp.text, x, y);
+      ctx.fillStyle = pp.big ? '#f2c14e' : '#fff'; ctx.fillText(pp.text, x, y);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // test/preview hooks
+  window.FH.art = {
+    gate: (p, t, dark) => drawGate(p, t, dark == null ? 0 : dark),
+    setFest: v => { fb = v; }, setTod: u => { todU = u; },
+    ctx: () => ctx
+  };
+
+  /* ============================================================
+     GAME FLOW
+     ============================================================ */
+
+  const $ = id => document.getElementById(id);
+  const startPanel = $('startPanel'), overPanel = $('overPanel');
+  const initialsForm = $('initialsForm'), initialsInput = $('initials');
+
+  let state = 'ready';          // ready | playing | dead
+  let sim = new Sim(1);
+  let pendingFlap = false;
+  let acc = 0, lastTime = performance.now(), clock = 0;
+  let deadAnim = null, shake = 0, flash = 0;
+  let posted = false, canRestartAt = 0;
+
+  function startGame() {
+    sim = new Sim((Math.random() * 4294967296) >>> 0);
+    state = 'playing';
+    posted = false;
+    deadAnim = null;
+    acc = 0;
+    ribbon.t = 0; pops.length = 0;
+    startPanel.hidden = true;
+    overPanel.hidden = true;
+    pendingFlap = true;
+  }
+
+  function flap() {
+    if (state === 'ready') { startGame(); return; }
+    if (state === 'playing') pendingFlap = true;
+  }
+
+  function onDeath() {
+    state = 'dead';
+    sfx.hit();
+    shake = 0.35; flash = 0.25;
+    deadAnim = { y: sim.bird.y, vy: Math.max(0, sim.bird.vy) * 0.5, a: 0.4 };
+    if (sim.points > best) { best = sim.points; store.set('fh_best', best); }
+    fetchBoard();
+    setTimeout(showOver, 650);
+  }
+
+  function showOver() {
+    if (state !== 'dead') return;
+    $('finalScore').textContent = sim.points;
+    $('hitLine').textContent = sim.hit && sim.hit.lm != null ? 'You hit ' + LANDMARKS[sim.hit.lm].name + '.' : 'You hit the ground.';
+    $('statLine').textContent = sim.score + (sim.score === 1 ? ' gate' : ' gates') + ' • ' + sim.pennies + (sim.pennies === 1 ? ' penny' : ' pennies');
+    overPanel.hidden = false;
+    canRestartAt = performance.now() + 350;
+    updateOver();
+  }
+
+  function updateOver() {
+    if (overPanel.hidden) return;
+    $('bestLine').textContent = 'Best: ' + best;
+    const can = !posted && qualifies(sim.points) && boardMode !== 'loading';
+    initialsForm.hidden = !can;
+    if (can) {
+      $('rankLine').textContent = 'You’d be #' + rankFor(sim.points) + ' on the board';
+      if (!initialsInput.value) initialsInput.value = store.get('fh_initials', '');
+    } else if (!posted) {
+      $('rankLine').textContent = sim.points > 0 && boardMode === 'loading' ? 'Checking the board…' : '';
+    }
+  }
+
+  function playAgain() {
+    if (state !== 'dead') return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    startGame();
+  }
+
+  initialsInput.addEventListener('input', () => {
+    initialsInput.value = cleanInitials(initialsInput.value);
+  });
+
+  initialsForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const ini = cleanInitials(initialsInput.value);
+    const msg = $('formMsg');
+    if (ini.length !== 3) { msg.textContent = 'Three letters, please.'; return; }
+    if (BLOCKED.includes(ini)) { msg.textContent = 'Pick different initials.'; return; }
+    $('postBtn').disabled = true;
+    msg.textContent = 'Posting…';
+    const score = sim.points;
+    posted = true;
+    await postScore(ini, score);
+    initialsForm.hidden = true;
+    msg.textContent = '';
+    $('rankLine').textContent = 'Posted! You’re on the Hall of Fame below.';
+    $('postBtn').disabled = false;
+    document.querySelector('.fame').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  $('playBtn').addEventListener('click', e => { e.stopPropagation(); if (state === 'ready') startGame(); });
+  $('againBtn').addEventListener('click', e => { e.stopPropagation(); playAgain(); });
+
+  $('mute').textContent = muted ? '🔇' : '🔊';
+  $('mute').addEventListener('pointerdown', e => e.stopPropagation());
+  $('mute').addEventListener('click', e => {
+    e.stopPropagation();
+    muted = !muted; store.set('fh_muted', muted);
+    $('mute').textContent = muted ? '🔇' : '🔊';
+  });
+
+  $('stage').addEventListener('pointerdown', e => {
+    if (e.target.closest('button, input, form, label')) return;
+    if (state === 'dead') return;
+    e.preventDefault();
+    flap();
+  });
+
+  window.addEventListener('keydown', e => {
+    if (e.target && e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+      e.preventDefault();
+      if (e.repeat) return;
+      if (state === 'dead') { if (!overPanel.hidden && performance.now() > canRestartAt && initialsForm.hidden) playAgain(); }
+      else flap();
+    }
+  });
+
+  window.FH.flap = flap;
+  window.FH.state = () => state;
+  window.FH.peek = () => sim;   // read-only hook used by automated tests
+
+  function handleEvents() {
+    for (const ev of sim.events) {
+      if (ev.t === 'gate') {
+        sfx.score();
+        ribbon = { text: LANDMARKS[ev.lm].name, t: 1.8 };
+        if (ev.pts > 1) pop('+2');
+      } else if (ev.t === 'penny') { sfx.penny(); pop('+' + ev.pts); }
+      else if (ev.t === 'slider') { sfx.slider(); pop('Laha’s Slider! One free pass', true); }
+      else if (ev.t === 'shield') { sfx.shield(); flash = 0.2; pop('The slider saved you!', true); }
+      else if (ev.t === 'arch') { sfx.arch(); pop('LINCOLN DAYS! Double points', true); }
+    }
+  }
+
+  /* ============================================================
+     MAIN LOOP
+     ============================================================ */
+
+  function frame(now) {
+    const dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+    clock += dt;
+
+    if (state === 'playing') {
+      acc += dt;
+      while (acc >= STEP && state === 'playing') {
+        acc -= STEP;
+        const f = pendingFlap; pendingFlap = false;
+        sim.step(f);
+        if (f) sfx.flap();
+        handleEvents();
+        if (sim.dead) onDeath();
+      }
+      scroll += sim.speed() * dt;
+    } else if (state === 'ready') {
+      scroll += 40 * dt;
+    } else if (deadAnim) {
+      const groundY = CFG.H - CFG.GROUND - CFG.R;
+      if (deadAnim.y < groundY) {
+        deadAnim.vy = Math.min(CFG.MAXFALL, deadAnim.vy + CFG.GRAVITY * dt);
+        deadAnim.y = Math.min(groundY, deadAnim.y + deadAnim.vy * dt);
+        deadAnim.a = Math.min(1.5, deadAnim.a + 5 * dt);
+      }
+    }
+    if (shake > 0) shake -= dt;
+    if (flash > 0) flash -= dt;
+
+    // ease the time of day and the festival look
+    if (!window.FH.hold) {
+      const tgtU = state === 'ready' ? 0 : sim.score / CFG.PHASE;
+      todU += (tgtU - todU) * Math.min(1, dt * 1.6);
+      const tgtF = (state !== 'ready' && sim.festLeft > 0) ? 1 : 0;
+      fb += (tgtF - fb) * Math.min(1, dt * 2.2);
+    }
+    const pal = palAt(todU);
+
+    ctx.save();
+    if (shake > 0) ctx.translate((Math.random() - 0.5) * 8 * (shake / 0.35), (Math.random() - 0.5) * 8 * (shake / 0.35));
+    drawBackground(clock, pal);
+    for (const it of sim.items) drawItem(it, clock);
+    for (const p of sim.pipes) drawGate(p, clock, pal.dark);
+    drawGround(sim.groundX, pal);
+    if (fb > 0.02) drawBunting(clock);
+
+    const hat = fb > 0.5;
+    if (state === 'ready') {
+      drawHawk(CFG.BIRD_X, CFG.H * 0.42 + Math.sin(clock * 3) * 6, Math.sin(clock * 3) * 0.08, clock, false, false, false, false);
+    } else if (state === 'playing') {
+      drawHawk(CFG.BIRD_X, sim.bird.y, Math.max(-0.45, Math.min(1.1, sim.bird.vy / 520)), clock, false, hat, sim.shield, sim.inv > 0);
+    } else if (deadAnim) {
+      drawHawk(CFG.BIRD_X, deadAnim.y, deadAnim.a, clock, true, hat, false, false);
+    }
+    if (state !== 'ready') drawHud(sim.points, dt);
+    ctx.restore();
+
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (flash / 0.25) * 0.55 + ')';
+      ctx.fillRect(0, 0, CFG.W, CFG.H);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // Init
+  $('startBest').textContent = best ? 'Your best: ' + best : '';
+  resize();
+  renderBoard();
+  fetchBoard();
+  requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
